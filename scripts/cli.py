@@ -4,6 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from datetime import datetime
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
 
 def get_ssl_info(domain):
     try:
@@ -65,6 +68,7 @@ def detect_software(html):
     return list(set(found))
 
 def main():
+    console = Console()
     url = input("Gib eine URL ein (mit https://): ").strip()
     domain = urlparse(url).hostname
 
@@ -73,10 +77,13 @@ def main():
     if not html:
         return
 
-    print("\n📄 Meta-Daten:")
     title, desc = extract_meta(html)
-    print(f"  Titel: {title}")
-    print(f"  Beschreibung: {desc if desc else 'Keine Beschreibung gefunden'}")
+    table = Table(show_header=False, title="GENERAL INFORMATION", title_style="bold green")
+    table.add_row("Title:", title)
+    table.add_row("Description:", desc if desc else "Keine Beschreibung gefunden")
+    table.add_row("URL:", url)
+    table.add_row("Software:", "Unbekannt")  # Placeholder
+    console.print(table)
 
     print("\n🛠️  Erkannte Software/Tracker:")
     software = detect_software(html)
@@ -93,11 +100,13 @@ def main():
     print("\n🔐 SSL-Zertifikat:")
     ssl_info = get_ssl_info(domain)
     if "error" in ssl_info:
-        print(f"  Fehler: {ssl_info['error']}")
+        console.print(f"[red]SSL-Fehler:[/red] {ssl_info['error']}")
     else:
-        print(f"  Ausgestellt von: {ssl_info['issuer']}")
-        print(f"  Gültig von: {ssl_info['valid_from']}")
-        print(f"  Gültig bis: {ssl_info['valid_to']}")
+        ssl_table = Table(show_header=False, title="SSL CERTIFICATE", title_style="bold green")
+        ssl_table.add_row("Issuer:", ssl_info['issuer'])
+        ssl_table.add_row("Valid from:", ssl_info['valid_from'])
+        ssl_table.add_row("Valid to:", ssl_info['valid_to'])
+        console.print(ssl_table)
 
 if __name__ == "__main__":
     main()
