@@ -1,6 +1,6 @@
 from core.fetching import fetch_html_and_requests, extract_meta
 from core.cms import detect_cms, detect_wordpress_theme, detect_plugins
-from core.ssl import get_ssl_info
+from core.ssl_info import get_ssl_info
 from core.cookies import analyze_cookies
 from core.email import check_email_security
 from core.dsgvo import evaluate_risks
