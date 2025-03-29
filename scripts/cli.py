@@ -221,14 +221,6 @@ def main():
                 })
                 break
 
-    # Abschnitt: GENERAL INFORMATION
-    title, desc = extract_meta(html)
-    table = Table(show_header=False, title="1. GENERAL INFORMATION", title_style="bold green")
-    table.add_row("URL:", url)
-    table.add_row("Title:", title)
-    table.add_row("Description:", desc if desc else "Keine Beschreibung gefunden")
-    console.print(table)
-
     # Abschnitt: SOFTWARE / CMS
     cms_list, builder_list = detect_cms(html)
     theme = detect_wordpress_theme(html)
@@ -239,12 +231,28 @@ def main():
         print(f"  Page-Builder: {', '.join(builder_list)}")
     if theme:
         print(f"  Theme: {theme}")
-    if software:
-        print("  Plugins / Tracker:")
-        for s in software:
-            print(f"    - {s}")
+
+    # Plugins (nur WordPress)
+    wordpress_plugins = []
+    if "WordPress" in cms_list:
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup.find_all("link", href=True):
+            if "/wp-content/plugins/" in tag["href"]:
+                plugin = tag["href"].split("/wp-content/plugins/")[1].split("/")[0]
+                if plugin not in wordpress_plugins:
+                    wordpress_plugins.append(plugin)
+        for tag in soup.find_all("script", src=True):
+            if "/wp-content/plugins/" in tag["src"]:
+                plugin = tag["src"].split("/wp-content/plugins/")[1].split("/")[0]
+                if plugin not in wordpress_plugins:
+                    wordpress_plugins.append(plugin)
+
+    if wordpress_plugins:
+        print(f"  Plugins:")
+        for p in sorted(set(wordpress_plugins)):
+            print(f"    - {p}")
     else:
-        print("  Plugins / Tracker: Keine erkannt")
+        print("  Plugins: Keine erkannt")
 
     # Abschnitt: Tracker
     console.print("\n[bold]3. Tracker[/bold]")
@@ -265,54 +273,18 @@ def main():
                 print(f"     Grund: {r['note']}")
 
     if pre_consent_violations:
-        print("\❗️ [Verstoß: Tracker vor Einwilligung geladen]")
+        print("\n‼️ [Verstoß: Tracker vor Einwilligung geladen]")
         for r in pre_consent_violations:
-            print(f"  ❗️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            print(f"  ‼️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
                 print(f"     Grund: {r['note']}")
-
-    risks = []
-    lower_network = [r.lower() for r in network_requests]
-
-    if not cookie_banner_detected and software:
-        risks.append("Tracker ohne Einwilligung")
-
-    if any("googletagmanager" in r for r in lower_network) and not cookie_banner_detected:
-        risks.append("Google-Tools ohne Einwilligung")
-
-    if any("googleapis.com" in r for r in lower_network):
-        risks.append("Google Schriftarten (extern)")
-
-    if any("vimeo.com" in r for r in lower_network):
-        risks.append("Vimeo Video")
-
-    if any("activecampaign" in r for r in lower_network):
-        risks.append("ActiveCampaign")
-
-    if any(x in r for r in lower_network for x in ["cdn.", "player.", "embed.", "font.", "video."]):
-        risks.append("Externe Dateien")
 
     if risks:
         print("\n❌ [DSGVO-Indikatoren]")
         for r in sorted(set(risks)):
             print(f"  ❌ {r}")
 
-    print("\n🔐 SSL-Zertifikat:")
-    ssl_info = get_ssl_info(domain)
-    if "error" in ssl_info:
-        console.print(f"[red]SSL-Fehler:[/red] {ssl_info['error']}")
-    else:
-        ssl_table = Table(show_header=False, title="SSL CERTIFICATE", title_style="bold green")
-        ssl_table.add_row("Issuer:", ssl_info['issuer'])
-        ssl_table.add_row("Valid from:", ssl_info['valid_from'])
-        ssl_table.add_row("Valid to:", ssl_info['valid_to'])
-        ssl_table.add_row("Common Name:", ssl_info['common_name'])
-        ssl_table.add_row("Serial Number:", ssl_info['serial_number'])
-        ssl_table.add_row("FP SHA-1:", ssl_info['sha1'])
-        ssl_table.add_row("FP SHA-256:", ssl_info['sha256'])
-        console.print(ssl_table)
-
-    # Ampel-Logik basierend auf erkannten Risiken
+    # Ampel direkt darunter anzeigen
     total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
     if total_risks == 0:
         console.print("\n🟢 [bold green]DSGVO-Ampel: Keine erkannten Risiken[/bold green]")
