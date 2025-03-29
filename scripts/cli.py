@@ -1,12 +1,12 @@
 import ssl
 import socket
-import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from datetime import datetime
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from playwright.sync_api import sync_playwright
 
 def get_ssl_info(domain):
     try:
@@ -31,14 +31,17 @@ def get_ssl_info(domain):
         return {"error": str(e)}
 
 def fetch_html(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64)"
-    }
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        return response.text
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="load", timeout=20000)
+            page.wait_for_timeout(2000)  # Kurze Wartezeit, damit JS laden kann
+            content = page.content()
+            browser.close()
+            return content
     except Exception as e:
-        print(f"Fehler beim Abrufen von {url}: {e}")
+        print(f"Fehler beim Laden mit Playwright: {e}")
         return None
 
 def extract_meta(html):
