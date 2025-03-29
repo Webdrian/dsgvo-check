@@ -194,6 +194,27 @@ def main():
         print(f"Fehler beim Laden von riskmap.json: {e}")
         riskmap = []
 
+    # Phase-A-Verstöße prüfen: Was wurde vor dem Consent geladen?
+    pre_consent_violations = []
+
+    for entry in riskmap:
+        for pattern in entry["match"]:
+            if any(pattern.lower() in url.lower() for url in pre_consent_requests):
+                pre_consent_violations.append({
+                    "name": entry["name"],
+                    "category": entry["category"],
+                    "risk": entry["risk"],
+                    "note": entry.get("note", "")
+                })
+                break
+
+    if pre_consent_violations:
+        print("\n🚫 [Verstoß: Tracker vor Einwilligung geladen]")
+        for r in pre_consent_violations:
+            print(f"  ❌ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            if r["note"]:
+                print(f"     Grund: {r['note']}")
+
     matched_risks = []
 
     for entry in riskmap:
@@ -293,7 +314,7 @@ def main():
         console.print(ssl_table)
 
     # Ampel-Logik basierend auf erkannten Risiken
-    total_risks = len(risks) + len(matched_risks)
+    total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
     if total_risks == 0:
         console.print("\n🟢 [bold green]DSGVO-Ampel: Keine erkannten Risiken[/bold green]")
     elif total_risks <= 2:
