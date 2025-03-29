@@ -113,10 +113,8 @@ def detect_wordpress_theme(html):
     return None
 
 def detect_cms(html):
-    cms_keywords = {
+    cms_patterns = {
         "WordPress": ["wp-content", "wp-includes", "wordpress"],
-        "Elementor": ["elementor"],
-        "Divi": ["et_pb_", "divi"],
         "Wix": ["wix.com", "wixsite", "Wix.ads", "viewerWix"],
         "Webflow": ["webflow.js", "webflow.css", "data-wf-page"],
         "Joomla": ["joomla"],
@@ -126,13 +124,27 @@ def detect_cms(html):
         "Shopify": ["cdn.shopify.com", "shopify"]
     }
 
-    found = []
-    for name, patterns in cms_keywords.items():
+    builder_patterns = {
+        "Elementor": ["elementor"],
+        "Divi": ["et_pb_", "divi"]
+    }
+
+    cms_found = []
+    builders_found = []
+
+    for name, patterns in cms_patterns.items():
         for pattern in patterns:
             if pattern.lower() in html.lower():
-                found.append(name)
+                cms_found.append(name)
                 break
-    return sorted(set(found))
+
+    for name, patterns in builder_patterns.items():
+        for pattern in patterns:
+            if pattern.lower() in html.lower():
+                builders_found.append(name)
+                break
+
+    return sorted(set(cms_found)), sorted(set(builders_found))
 
 def main():
     console = Console()
@@ -182,11 +194,14 @@ def main():
     theme = detect_wordpress_theme(html)
     print(f"  Theme: {theme}" if theme else "  Kein WordPress-Theme gefunden")
 
-    cms = detect_cms(html)
-    if cms:
-        console.print(f"\n🧩 [bold cyan]CMS erkannt:[/bold cyan] {', '.join(cms)}")
+    cms_list, builder_list = detect_cms(html)
+    if cms_list:
+        console.print(f"\n🧩 [bold cyan]CMS erkannt:[/bold cyan] {', '.join(cms_list)}")
     else:
         console.print(f"\n🧩 [cyan]Kein CMS erkannt[/cyan]")
+
+    if builder_list:
+        console.print(f"\n🔧 [bold magenta]Page-Builder erkannt:[/bold magenta] {', '.join(builder_list)}")
 
     print("\n🔐 SSL-Zertifikat:")
     ssl_info = get_ssl_info(domain)
