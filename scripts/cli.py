@@ -44,7 +44,7 @@ def fetch_html_and_requests(url):
         except:
             pass
 
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(7000)  # längere Wartezeit für dynamisch geladene Tracker
 
         html = page.content()
 
