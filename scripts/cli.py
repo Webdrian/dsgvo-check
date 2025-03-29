@@ -183,6 +183,7 @@ def main():
 
     print("\n🔍 Lade Seite...")
     html = fetch_html_and_requests(url)
+    software = detect_software(html)
     title, desc = extract_meta(html)
     ssl_info = get_ssl_info(domain)
 
@@ -192,21 +193,6 @@ def main():
     table.add_row("Title:", title)
     table.add_row("Description:", desc if desc else "Keine Beschreibung gefunden")
     console.print(table)
-
-    # SSL-Zertifikat anzeigen
-    console.print("\n[bold]SSL-Zertifikat:[/bold]")
-    if ssl_info and "error" not in ssl_info:
-        cert_table = Table(show_header=False)
-        cert_table.add_row("Issuer:", ssl_info["issuer"])
-        cert_table.add_row("Valid from:", ssl_info["valid_from"])
-        cert_table.add_row("Valid to:", ssl_info["valid_to"])
-        cert_table.add_row("Common Name:", ssl_info["common_name"])
-        cert_table.add_row("Serial Number:", ssl_info["serial_number"])
-        cert_table.add_row("FP SHA-1:", ssl_info["sha1"])
-        cert_table.add_row("FP SHA-256:", ssl_info["sha256"])
-        console.print(cert_table)
-    else:
-        print("Konnte SSL-Zertifikat nicht abrufen.")
 
     # Erweiterte Risikoauswertung über riskmap.json
     try:
@@ -314,6 +300,21 @@ def main():
         console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_risks} mögliche Probleme erkannt[/bold yellow]")
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
+
+    # SSL-Zertifikat anzeigen
+    console.print("\n[bold]SSL-Zertifikat:[/bold]")
+    if ssl_info and "error" not in ssl_info:
+        cert_table = Table(show_header=False)
+        cert_table.add_row("Issuer:", ssl_info["issuer"])
+        cert_table.add_row("Valid from:", ssl_info["valid_from"])
+        cert_table.add_row("Valid to:", ssl_info["valid_to"])
+        cert_table.add_row("Common Name:", ssl_info["common_name"])
+        cert_table.add_row("Serial Number:", ssl_info["serial_number"])
+        cert_table.add_row("FP SHA-1:", ssl_info["sha1"])
+        cert_table.add_row("FP SHA-256:", ssl_info["sha256"])
+        console.print(cert_table)
+    else:
+        print("Konnte SSL-Zertifikat nicht abrufen.")
 
 if __name__ == "__main__":
     main()
