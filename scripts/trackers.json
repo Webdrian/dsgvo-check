@@ -1,8 +1,23 @@
 [
-    { "name": "Google Analytics", "match": ["gtag/js", "analytics.js"] },
-    { "name": "Facebook Pixel", "match": ["facebook.net"] },
-    { "name": "Hotjar", "match": ["hotjar.com"] },
-    { "name": "Matomo", "match": ["matomo.js"] },
-    { "name": "Microsoft Clarity", "match": ["clarity.ms"] },
-    { "name": "Google Tag Manager", "match": ["tagmanager"] }
-  ]
+  { "name": "Google Analytics", "match": ["gtag/js", "analytics.js", "google-analytics.com"] },
+  { "name": "Facebook Pixel", "match": ["facebook.net", "fbevents.js"] },
+  { "name": "Hotjar", "match": ["hotjar.com", "hotjar-scripts", "hj-"] },
+  { "name": "Matomo", "match": ["matomo.js", "piwik.js", "/matomo.php"] },
+  { "name": "Microsoft Clarity", "match": ["clarity.ms"] },
+  { "name": "Google Tag Manager", "match": ["googletagmanager.com", "gtm.js"] },
+  { "name": "LinkedIn Insight", "match": ["snap.licdn.com"] },
+  { "name": "Twitter Pixel", "match": ["static.ads-twitter.com"] },
+  { "name": "TikTok Pixel", "match": ["tiktok.com/i18n/pixel"] },
+  { "name": "Pinterest Tag", "match": ["ct.pinterest.com"] },
+  { "name": "Bing Ads", "match": ["bat.bing.com"] },
+  { "name": "Google Ads / Conversion", "match": ["googleadservices.com", "pagead/"] },
+  { "name": "HubSpot", "match": ["js.hs-scripts.com", "hs-analytics.net"] },
+  { "name": "Sentry", "match": ["sentry.io"] },
+  { "name": "Vimeo", "match": ["vimeo.com/player", "lensflare.vimeo.com"] },
+  { "name": "YouTube", "match": ["youtube.com/embed", "ytimg.com"] },
+  { "name": "Soundcloud", "match": ["w.soundcloud.com/player"] },
+  { "name": "Typeform", "match": ["embed.typeform.com"] },
+  { "name": "Calendly", "match": ["assets.calendly.com"] },
+  { "name": "Stripe", "match": ["js.stripe.com"] },
+  { "name": "Intercom", "match": ["widget.intercom.io"] }
+]
