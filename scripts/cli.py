@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 import hashlib
-from scripts.core import detect_software
+from core import detect_software
 
 def get_ssl_info(domain):
     try:
