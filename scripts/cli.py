@@ -179,6 +179,31 @@ def main():
     if not html:
         return
 
+    # Erweiterte Risikoauswertung über riskmap.json
+    try:
+        with open("scripts/riskmap.json", "r", encoding="utf-8") as f:
+            riskmap = json.load(f)
+    except Exception as e:
+        print(f"Fehler beim Laden von riskmap.json: {e}")
+        riskmap = []
+
+    matched_risks = []
+
+    for entry in riskmap:
+        for pattern in entry["match"]:
+            if any(pattern.lower() in url.lower() for url in network_requests):
+                matched_risks.append({
+                    "name": entry["name"],
+                    "category": entry["category"],
+                    "risk": entry["risk"]
+                })
+                break
+
+    if matched_risks:
+        print("\n🚨 [DSGVO-Risiken laut RiskMap]")
+        for r in matched_risks:
+            print(f"  ❌ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+
     # DSGVO-Risiko-Indikatoren
     risks = []
     lower_network = [r.lower() for r in network_requests]

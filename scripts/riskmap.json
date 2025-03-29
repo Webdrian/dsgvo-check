@@ -1,0 +1,62 @@
+[
+    {
+      "name": "Google Analytics",
+      "category": "Tracking",
+      "match": ["gtag/js", "analytics.js", "google-analytics.com"],
+      "risk": "hoch"
+    },
+    {
+      "name": "Google Tag Manager",
+      "category": "Tag Management",
+      "match": ["googletagmanager.com", "gtm.js"],
+      "risk": "hoch"
+    },
+    {
+      "name": "Google Fonts",
+      "category": "Externe Schriftarten",
+      "match": ["fonts.googleapis.com", "fonts.gstatic.com"],
+      "risk": "mittel"
+    },
+    {
+      "name": "Vimeo",
+      "category": "Externe Medien",
+      "match": ["vimeo.com/player", "vimeo.com"],
+      "risk": "hoch"
+    },
+    {
+      "name": "YouTube",
+      "category": "Externe Medien",
+      "match": ["youtube.com", "ytimg.com"],
+      "risk": "hoch"
+    },
+    {
+      "name": "Facebook Pixel",
+      "category": "Tracking",
+      "match": ["facebook.net", "fbevents.js"],
+      "risk": "hoch"
+    },
+    {
+      "name": "Cookiebot",
+      "category": "Cookie Consent",
+      "match": ["consent.cookiebot.com", "cookiebot"],
+      "risk": "niedrig"
+    },
+    {
+      "name": "ActiveCampaign",
+      "category": "Marketing Automation",
+      "match": ["activecampaign.com", "trackcmp.net"],
+      "risk": "hoch"
+    },
+    {
+      "name": "HubSpot",
+      "category": "CRM & Marketing",
+      "match": ["hs-scripts.com", "hs-analytics.net"],
+      "risk": "hoch"
+    },
+    {
+      "name": "Cloudflare",
+      "category": "CDN / Sicherheit",
+      "match": ["cloudflare.com", "cf-ns.com"],
+      "risk": "niedrig"
+    }
+  ]
