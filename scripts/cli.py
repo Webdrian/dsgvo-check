@@ -292,6 +292,33 @@ def main():
         for r in sorted(set(risks)):
             print(f"  ❌ {r}")
 
+    # Abschnitt: 5. E-Mail-Sicherheitsprüfung
+    console.print("\n[bold blue]5. E-Mail-Sicherheit[/bold blue]")
+
+    def check_dns_record(name):
+        try:
+            import dns.resolver
+            answers = dns.resolver.resolve(name, 'TXT')
+            return [r.to_text() for r in answers]
+        except:
+            return []
+
+    def check_email_security(domain):
+        result = {}
+        result["SPF"] = check_dns_record(domain)
+        result["DMARC"] = check_dns_record(f"_dmarc.{domain}")
+        result["DKIM"] = check_dns_record(f"default._domainkey.{domain}")
+        return result
+
+    email_security = check_email_security(domain)
+
+    for key in ["SPF", "DKIM", "DMARC"]:
+        records = email_security.get(key, [])
+        if any("v=" in r for r in records):
+            console.print(f"✅ {key} vorhanden")
+        else:
+            console.print(f"❌ {key} fehlt oder falsch konfiguriert")
+
     # Ampel direkt darunter anzeigen
     total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
     if total_risks == 0:
