@@ -175,6 +175,7 @@ def main():
 
     print("\n🔍 Lade Seite...")
     html = fetch_html_and_requests(url)
+    software = detect_software(html)
     if not html:
         return
 
