@@ -14,6 +14,7 @@ import json
 
 network_requests = []
 cookie_banner_detected = False
+cookie_tool_name = None
 
 def fetch_html_and_requests(url):
     global cookie_banner_detected
@@ -55,6 +56,27 @@ def fetch_html_and_requests(url):
         cookie_banner_detected = any(
             word in html.lower() for word in cookie_keywords
         )
+        
+        # Versuche bekannte Cookie-Tools zu erkennen
+        known_tools = {
+            "Borlabs Cookie": ["borlabs-cookie", "borlabs-cookie-blocker"],
+            "Real Cookie Banner": ["real-cookie-banner"],
+            "Cookiebot": ["consent.cookiebot.com", "cookiebot"],
+            "Complianz": ["cmplz", "complianz.io"],
+            "CookieYes": ["cookieyes", "cookie-law-info"],
+            "OneTrust": ["onetrust", "optanon"],
+            "Usercentrics": ["usercentrics"],
+            "Didomi": ["didomi"]
+        }
+
+        for name, patterns in known_tools.items():
+            for pattern in patterns:
+                if pattern.lower() in html.lower():
+                    global cookie_tool_name
+                    cookie_tool_name = name
+                    break
+            if cookie_tool_name:
+                break
 
         browser.close()
         return html
@@ -186,7 +208,10 @@ def main():
         print("  Keine Tracker erkannt")
 
     if cookie_banner_detected:
-        console.print("\n🍪 [bold yellow]Cookie-Banner erkannt[/bold yellow]")
+        if cookie_tool_name:
+            console.print(f"\n🍪 [bold yellow]Cookie-Banner erkannt:[/bold yellow] {cookie_tool_name}")
+        else:
+            console.print("\n🍪 [bold yellow]Cookie-Banner erkannt[/bold yellow]")
     else:
         console.print("\n❌ [red]Kein Cookie-Banner erkannt[/red]")
 
