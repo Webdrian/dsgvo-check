@@ -121,5 +121,47 @@
       "match": ["matomo.js", "piwik.js", "matomo.php", "piwik.php"],
       "risk": "mittel",
       "note": "Kann datenschutzkonform sein, wenn korrekt konfiguriert (z. B. ohne Cookies, mit IP-Anonymisierung)"
+    },
+    {
+      "name": "Google reCAPTCHA",
+      "category": "Sicherheitsdienst / Drittanbieter",
+      "match": ["www.google.com/recaptcha", "gstatic.com/recaptcha"],
+      "risk": "hoch",
+      "note": "Verbindung zu Google-Servern – personenbezogene Daten werden übertragen, z. T. in Drittländer."
+    },
+    {
+      "name": "Google Maps",
+      "category": "Externe Medien / Karten",
+      "match": ["maps.googleapis.com", "maps.gstatic.com", "maps.google.com"],
+      "risk": "hoch",
+      "note": "Bindet Google-Server ein – personenbezogene Daten wie IP-Adresse werden an Google übermittelt."
+    },
+    {
+      "name": "Typeform",
+      "category": "Formular / Interaktion",
+      "match": ["typeform.com", "embed.typeform.com"],
+      "risk": "hoch",
+      "note": "Formulare übertragen personenbezogene Daten an externe Server – Consent erforderlich."
+    },
+    {
+      "name": "Calendly",
+      "category": "Terminvereinbarung",
+      "match": ["calendly.com", "assets.calendly.com"],
+      "risk": "hoch",
+      "note": "Einbindung über iframe – personenbezogene Daten werden an Dritte weitergegeben."
+    },
+    {
+      "name": "Zapier",
+      "category": "Automatisierung / Webhooks",
+      "match": ["zapier.com", "hooks.zapier.com"],
+      "risk": "hoch",
+      "note": "Webhooks können personenbezogene Daten an Drittanbieter übertragen – nur mit Einwilligung erlaubt."
+    },
+    {
+      "name": "Intercom",
+      "category": "Chat / Support",
+      "match": ["intercom.io", "widget.intercom.io", "intercomcdn.com"],
+      "risk": "hoch",
+      "note": "Chatfenster trackt Nutzeraktivität – personenbezogene Daten können in Drittländer übertragen werden."
     }
 ]
