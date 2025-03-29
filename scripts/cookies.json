@@ -1,0 +1,68 @@
+[
+  {
+    "name": "_ga",
+    "tool": "Google Analytics",
+    "category": "Analyse",
+    "risk": "hoch"
+  },
+  {
+    "name": "_gid",
+    "tool": "Google Analytics",
+    "category": "Analyse",
+    "risk": "hoch"
+  },
+  {
+    "name": "_gat",
+    "tool": "Google Analytics",
+    "category": "Analyse",
+    "risk": "hoch"
+  },
+  {
+    "name": "_fbp",
+    "tool": "Facebook Pixel",
+    "category": "Marketing",
+    "risk": "hoch"
+  },
+  {
+    "name": "hubspotutk",
+    "tool": "HubSpot",
+    "category": "Marketing",
+    "risk": "hoch"
+  },
+  {
+    "name": "matomo",
+    "tool": "Matomo",
+    "category": "Analyse",
+    "risk": "mittel"
+  },
+  {
+    "name": "piwik",
+    "tool": "Matomo (alt)",
+    "category": "Analyse",
+    "risk": "mittel"
+  },
+  {
+    "name": "ajs_user_id",
+    "tool": "Segment",
+    "category": "Marketing",
+    "risk": "hoch"
+  },
+  {
+    "name": "ajs_anonymous_id",
+    "tool": "Segment",
+    "category": "Marketing",
+    "risk": "hoch"
+  },
+  {
+    "name": "cookie_consent",
+    "tool": "Cookie Consent",
+    "category": "Technisch notwendig",
+    "risk": "niedrig"
+  },
+  {
+    "name": "PHPSESSID",
+    "tool": "PHP Session",
+    "category": "Technisch notwendig",
+    "risk": "niedrig"
+  }
+]
