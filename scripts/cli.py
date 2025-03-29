@@ -301,116 +301,109 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
 
-# Abschnitt: 6. Cookies
-console.print("\n[bold magenta]6. Cookies gesetzt[/bold magenta]")
-
-cookies_before = []
-cookies_after = []
-cookie_db = {}
-
-# cookies.json laden
-try:
-    with open("scripts/cookies.json", "r", encoding="utf-8") as f:
-        cookie_db = json.load(f)
-except Exception as e:
-    console.print(f"[bold red]Fehler beim Laden von cookies.json:[/bold red] {e}")
-    cookie_db = []
-
-def find_cookie_info(name):
-    for entry in cookie_db:
-        if name.lower().startswith(entry["name"].lower()):
-            return entry
-    return None
-
-try:
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
-
-        # Phase A – vor Consent
-        page.goto(url, timeout=20000)
-        page.wait_for_timeout(3000)
-        cookies_before = context.cookies()
-
-        # Consent klicken
-        try:
-            selectors = [
-                "text=Alle akzeptieren", "text=Zustimmen", "text=Einverstanden",
-                "button:has-text('Akzeptieren')", "button:has-text('OK')",
-                "text=Ich stimme zu"
-            ]
-            for selector in selectors:
-                try:
-                    page.click(selector, timeout=2000)
-                    break
-                except:
-                    continue
-        except:
-            pass
-
-        page.wait_for_timeout(3000)
-        cookies_after = context.cookies()
-        browser.close()
-except Exception as e:
-    console.print(f"Fehler beim Cookie-Check: {e}")
+    # Abschnitt: 6. Cookies
+    console.print("\n[bold magenta]6. Cookies gesetzt[/bold magenta]")
+    cookies_before = []
     cookies_after = []
+    cookie_db = {}
 
-# Nach Consent – Tabelle
-if cookies_after:
-    cookie_table = Table(title="Cookies nach Zustimmung", show_lines=True)
-    cookie_table.add_column("Name", style="bold")
-    cookie_table.add_column("Kategorie")
-    cookie_table.add_column("Tool")
-    cookie_table.add_column("Domain")
-    cookie_table.add_column("Path")
-    cookie_table.add_column("Expires")
-    cookie_table.add_column("Secure")
-    cookie_table.add_column("HttpOnly")
+    try:
+        with open("scripts/cookies.json", "r", encoding="utf-8") as f:
+            cookie_db = json.load(f)
+    except Exception as e:
+        console.print(f"[bold red]Fehler beim Laden von cookies.json:[/bold red] {e}")
+        cookie_db = []
 
-    for c in cookies_after:
-        name = c.get("name", "")
-        domain = c.get("domain", "")
-        path = c.get("path", "")
-        expires = str(c.get("expires", ""))
-        secure = str(c.get("secure", ""))
-        http_only = str(c.get("httpOnly", ""))
-        info = find_cookie_info(name)
-        category = info["category"] if info else "Unbekannt"
-        tool = info["tool"] if info else "?"
-        cookie_table.add_row(name, category, tool, domain, path, expires, secure, http_only)
+    def find_cookie_info(name):
+        for entry in cookie_db:
+            if name.lower().startswith(entry["name"].lower()):
+                return entry
+        return None
 
-    console.print(cookie_table)
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
 
-# Vor Consent – Tabelle
-if cookies_before:
-    pre_table = Table(title="Cookies vor Zustimmung", show_lines=False)
-    pre_table.add_column("Name", style="bold")
-    pre_table.add_column("Kategorie")
-    pre_table.add_column("Tool")
+            page.goto(url, timeout=20000)
+            page.wait_for_timeout(3000)
+            cookies_before = context.cookies()
 
-    for c in cookies_before:
-        name = c.get("name", "")
-        info = find_cookie_info(name)
-        category = info["category"] if info else "Unbekannt"
-        tool = info["tool"] if info else "?"
-        pre_table.add_row(name, category, tool)
+            try:
+                selectors = [
+                    "text=Alle akzeptieren", "text=Zustimmen", "text=Einverstanden",
+                    "button:has-text('Akzeptieren')", "button:has-text('OK')",
+                    "text=Ich stimme zu"
+                ]
+                for selector in selectors:
+                    try:
+                        page.click(selector, timeout=2000)
+                        break
+                    except:
+                        continue
+            except:
+                pass
 
-    console.print(pre_table)
+            page.wait_for_timeout(3000)
+            cookies_after = context.cookies()
+            browser.close()
+    except Exception as e:
+        console.print(f"Fehler beim Cookie-Check: {e}")
+        cookies_after = []
 
-    # DSGVO-Risiko, wenn Marketing-/Analyse-Cookies vor Zustimmung
-    suspicious = [
-        c.get("name", "") for c in cookies_before
-        if (info := find_cookie_info(c.get("name", ""))) and info["category"] in ["Analyse", "Marketing"]
-    ]
+    if cookies_after:
+        cookie_table = Table(title="Cookies nach Zustimmung", show_lines=True)
+        cookie_table.add_column("Name", style="bold")
+        cookie_table.add_column("Kategorie")
+        cookie_table.add_column("Tool")
+        cookie_table.add_column("Domain")
+        cookie_table.add_column("Path")
+        cookie_table.add_column("Expires")
+        cookie_table.add_column("Secure")
+        cookie_table.add_column("HttpOnly")
 
-    if suspicious:
-        console.print("\n[bold red]‼️ Cookies vor Einwilligung gesetzt:[/bold red]")
-        for sc in suspicious:
-            console.print(f"  ‼️ {sc}")
-        risks.append("Tracking-/Marketing-Cookies wurden vor Einwilligung gesetzt")
-else:
-    console.print("Keine Cookies erkannt.")
+        for c in cookies_after:
+            name = c.get("name", "")
+            domain = c.get("domain", "")
+            path = c.get("path", "")
+            expires = str(c.get("expires", ""))
+            secure = str(c.get("secure", ""))
+            http_only = str(c.get("httpOnly", ""))
+            info = find_cookie_info(name)
+            category = info["category"] if info else "Unbekannt"
+            tool = info["tool"] if info else "?"
+            cookie_table.add_row(name, category, tool, domain, path, expires, secure, http_only)
+
+        console.print(cookie_table)
+
+    if cookies_before:
+        pre_table = Table(title="Cookies vor Zustimmung", show_lines=False)
+        pre_table.add_column("Name", style="bold")
+        pre_table.add_column("Kategorie")
+        pre_table.add_column("Tool")
+
+        for c in cookies_before:
+            name = c.get("name", "")
+            info = find_cookie_info(name)
+            category = info["category"] if info else "Unbekannt"
+            tool = info["tool"] if info else "?"
+            pre_table.add_row(name, category, tool)
+
+        console.print(pre_table)
+
+        suspicious = [
+            c.get("name", "") for c in cookies_before
+            if (info := find_cookie_info(c.get("name", ""))) and info["category"] in ["Analyse", "Marketing"]
+        ]
+
+        if suspicious:
+            console.print("\n[bold red]‼️ Cookies vor Einwilligung gesetzt:[/bold red]")
+            for sc in suspicious:
+                console.print(f"  ‼️ {sc}")
+            risks.append("Tracking-/Marketing-Cookies wurden vor Einwilligung gesetzt")
+    else:
+        console.print("Keine Cookies erkannt.")
 
     # Abschnitt: 5. E-Mail-Sicherheitsprüfung
     console.print("\n[bold blue]5. E-Mail-Sicherheit[/bold blue]")
