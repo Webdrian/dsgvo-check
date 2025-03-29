@@ -292,6 +292,15 @@ def main():
         for r in sorted(set(risks)):
             print(f"  ❌ {r}")
 
+    # Ampel direkt darunter anzeigen
+    total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
+    if total_risks == 0:
+        console.print("\n🟢 [bold green]DSGVO-Ampel: Keine erkannten Risiken[/bold green]")
+    elif total_risks <= 2:
+        console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_risks} mögliche Probleme erkannt[/bold yellow]")
+    else:
+        console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
+
     # Abschnitt: 5. E-Mail-Sicherheitsprüfung
     console.print("\n[bold blue]5. E-Mail-Sicherheit[/bold blue]")
 
@@ -312,21 +321,25 @@ def main():
 
     email_security = check_email_security(domain)
 
+    score = 0
+    total = 3
     for key in ["SPF", "DKIM", "DMARC"]:
         records = email_security.get(key, [])
         if any("v=" in r for r in records):
             console.print(f"✅ {key} vorhanden")
+            score += 1
         else:
             console.print(f"❌ {key} fehlt oder falsch konfiguriert")
 
-    # Ampel direkt darunter anzeigen
-    total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
-    if total_risks == 0:
-        console.print("\n🟢 [bold green]DSGVO-Ampel: Keine erkannten Risiken[/bold green]")
-    elif total_risks <= 2:
-        console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_risks} mögliche Probleme erkannt[/bold yellow]")
-    else:
-        console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
+    rating_text = {
+        3: "Sehr gut geschützt",
+        2: "Gut, aber Verbesserung möglich",
+        1: "Schwach abgesichert",
+        0: "Keine Schutzmaßnahmen erkannt"
+    }
+
+    console.print(f"\n🔐 Gesamtbewertung: {score}/3 – {rating_text[score]}")
+    console.print("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
 
     # SSL-Zertifikat anzeigen
     console.print("\n[bold]SSL-Zertifikat:[/bold]")
