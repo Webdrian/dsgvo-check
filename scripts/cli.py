@@ -112,6 +112,28 @@ def detect_wordpress_theme(html):
         return theme
     return None
 
+def detect_cms(html):
+    cms_keywords = {
+        "WordPress": ["wp-content", "wp-includes", "wordpress"],
+        "Elementor": ["elementor"],
+        "Divi": ["et_pb_", "divi"],
+        "Wix": ["wix.com", "wixsite", "Wix.ads", "viewerWix"],
+        "Webflow": ["webflow.js", "webflow.css", "data-wf-page"],
+        "Joomla": ["joomla"],
+        "Drupal": ["drupal", "sites/all", "misc/drupal.js"],
+        "Typo3": ["typo3"],
+        "Squarespace": ["static.squarespace.com"],
+        "Shopify": ["cdn.shopify.com", "shopify"]
+    }
+
+    found = []
+    for name, patterns in cms_keywords.items():
+        for pattern in patterns:
+            if pattern.lower() in html.lower():
+                found.append(name)
+                break
+    return sorted(set(found))
+
 def main():
     console = Console()
     url = input("Gib eine URL ein (mit https://): ").strip()
@@ -154,11 +176,17 @@ def main():
     if cookie_banner_detected:
         console.print("\n🍪 [bold yellow]Cookie-Banner erkannt[/bold yellow]")
     else:
-        console.print("\n✅ [green]Kein Cookie-Banner erkannt[/green]")
+        console.print("\n❌ [red]Kein Cookie-Banner erkannt[/red]")
 
     print("\n🎨 WordPress Theme:")
     theme = detect_wordpress_theme(html)
     print(f"  Theme: {theme}" if theme else "  Kein WordPress-Theme gefunden")
+
+    cms = detect_cms(html)
+    if cms:
+        console.print(f"\n🧩 [bold cyan]CMS erkannt:[/bold cyan] {', '.join(cms)}")
+    else:
+        console.print(f"\n🧩 [cyan]Kein CMS erkannt[/cyan]")
 
     print("\n🔐 SSL-Zertifikat:")
     ssl_info = get_ssl_info(domain)
