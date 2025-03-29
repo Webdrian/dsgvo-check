@@ -336,6 +336,15 @@ def main():
             cookie_table.add_row(name, domain, path, expires, secure, http_only)
 
         console.print(cookie_table)
+        
+        # Verdächtige Cookies markieren
+        suspicious_keywords = ["_ga", "_gid", "_gat", "_fbp", "matomo", "piwik", "ajs_", "amplitude", "hubspot", "ac_", "tracking", "sessionid", "cookie_consent", "cluid"]
+        suspicious_cookies = [c["name"] for c in cookies if any(keyword in c["name"].lower() for keyword in suspicious_keywords)]
+        
+        if suspicious_cookies:
+            console.print("\n[bold red]⚠️ Verdächtige Cookies erkannt:[/bold red]")
+            for sc in suspicious_cookies:
+                console.print(f"  ⚠️ {sc}")
     else:
         console.print("Keine Cookies erkannt.")
 
