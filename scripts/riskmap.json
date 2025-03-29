@@ -58,5 +58,68 @@
       "category": "CDN / Sicherheit",
       "match": ["cloudflare.com", "cf-ns.com"],
       "risk": "niedrig"
+    },
+    {
+      "name": "Hotjar",
+      "category": "Tracking / UX",
+      "match": ["hotjar.com", "hotjar-script", "hotjar.js"],
+      "risk": "hoch",
+      "note": "Setzt Cookies und zeichnet Nutzerverhalten auf – Einwilligung zwingend erforderlich."
+    },
+    {
+      "name": "LinkedIn Insight Tag",
+      "category": "Marketing",
+      "match": ["linkedin.com/insight", "li.ads", "linkedin.net"],
+      "risk": "hoch",
+      "note": "Erfasst Nutzerverhalten über mehrere Seiten hinweg – erfordert vorherige Zustimmung."
+    },
+    {
+      "name": "Microsoft Clarity",
+      "category": "Tracking / UX",
+      "match": ["clarity.ms", "clarity.js"],
+      "risk": "hoch",
+      "note": "Nutzertracking durch Session-Replays und Heatmaps – nur mit Consent erlaubt."
+    },
+    {
+      "name": "Google Optimize",
+      "category": "A/B Testing",
+      "match": ["optimize.google.com", "optimize.js"],
+      "risk": "hoch",
+      "note": "Bindet sich meist direkt an Google Analytics – benötigt ebenfalls Einwilligung."
+    },
+    {
+      "name": "Quantcast",
+      "category": "Tracking / Targeting",
+      "match": ["quantserve.com", "quantcast.mgr.consensu.org"],
+      "risk": "hoch",
+      "note": "Zählt zu den aggressivsten Werbetrackern – DSGVO-relevant."
+    },
+    {
+      "name": "Crazy Egg",
+      "category": "UX Analyse",
+      "match": ["crazyegg.com", "crazyegg.js"],
+      "risk": "hoch",
+      "note": "Heatmaps und Mausverfolgung – benötigt vorherige Zustimmung."
+    },
+    {
+      "name": "Salesforce Marketing Cloud",
+      "category": "Marketing Automation",
+      "match": ["exacttarget.com", "sfdc"],
+      "risk": "hoch",
+      "note": "Stark personenbezogenes Tracking – nur mit Consent erlaubt."
+    },
+    {
+      "name": "TikTok Pixel",
+      "category": "Tracking / Marketing",
+      "match": ["tiktok.com", "tiktokpixel.js"],
+      "risk": "hoch",
+      "note": "Cross-Site-Nutzerverfolgung – nur mit ausdrücklicher Zustimmung erlaubt."
+    },
+    {
+      "name": "Matomo",
+      "category": "Tracking",
+      "match": ["matomo.js", "piwik.js", "matomo.php", "piwik.php"],
+      "risk": "mittel",
+      "note": "Kann datenschutzkonform sein, wenn korrekt konfiguriert (z. B. ohne Cookies, mit IP-Anonymisierung)"
     }
-  ]
+]
