@@ -24,6 +24,26 @@ def fetch_html_and_requests(url):
         page.on("request", lambda request: network_requests.append(request.url))
 
         page.goto(url, wait_until="load", timeout=20000)
+
+        try:
+            # Cookie-Consent aktiv akzeptieren, wenn möglich
+            selectors = [
+                "text=Alle akzeptieren",
+                "text=Zustimmen",
+                "text=Einverstanden",
+                "button:has-text('Akzeptieren')",
+                "button:has-text('OK')",
+                "text=Ich stimme zu"
+            ]
+            for selector in selectors:
+                try:
+                    page.click(selector, timeout=2000)
+                    break
+                except:
+                    continue
+        except:
+            pass
+
         page.wait_for_timeout(5000)
 
         html = page.content()
