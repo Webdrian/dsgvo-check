@@ -208,13 +208,6 @@ def main():
                 })
                 break
 
-    if pre_consent_violations:
-        print("\n🚫 [Verstoß: Tracker vor Einwilligung geladen]")
-        for r in pre_consent_violations:
-            print(f"  ‼️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
-            if r["note"]:
-                print(f"     Grund: {r['note']}")
-
     matched_risks = []
 
     for entry in riskmap:
@@ -228,14 +221,56 @@ def main():
                 })
                 break
 
+    # Abschnitt: GENERAL INFORMATION
+    title, desc = extract_meta(html)
+    table = Table(show_header=False, title="1. GENERAL INFORMATION", title_style="bold green")
+    table.add_row("URL:", url)
+    table.add_row("Title:", title)
+    table.add_row("Description:", desc if desc else "Keine Beschreibung gefunden")
+    console.print(table)
+
+    # Abschnitt: SOFTWARE / CMS
+    cms_list, builder_list = detect_cms(html)
+    theme = detect_wordpress_theme(html)
+    console.print("\n[bold]2. Software – CMS[/bold]")
+    if cms_list:
+        print(f"  CMS: {', '.join(cms_list)}")
+    if builder_list:
+        print(f"  Page-Builder: {', '.join(builder_list)}")
+    if theme:
+        print(f"  Theme: {theme}")
+    if software:
+        print("  Plugins / Tracker:")
+        for s in software:
+            print(f"    - {s}")
+    else:
+        print("  Plugins / Tracker: Keine erkannt")
+
+    # Abschnitt: Tracker
+    console.print("\n[bold]3. Tracker[/bold]")
+    if software:
+        for s in software:
+            print(f"  - {s}")
+    else:
+        print("  Keine Tracker erkannt")
+
+    # Abschnitt: DSGVO-CHECK
+    console.print("\n[bold red]4. DSGVO-Check[/bold red]")
+
     if matched_risks:
-        print("\n🚨 [DSGVO-Risiken laut RiskMap]")
+        print("\n⚠️ [Risiken laut RiskMap]")
         for r in matched_risks:
             print(f"  ⚠️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
                 print(f"     Grund: {r['note']}")
 
-    # DSGVO-Risiko-Indikatoren
+    if pre_consent_violations:
+        print("\❗️ [Verstoß: Tracker vor Einwilligung geladen]")
+        for r in pre_consent_violations:
+            print(f"  ❗️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            if r["note"]:
+                print(f"     Grund: {r['note']}")
+
     risks = []
     lower_network = [r.lower() for r in network_requests]
 
@@ -258,45 +293,9 @@ def main():
         risks.append("Externe Dateien")
 
     if risks:
-        print("\n🚨 [DSGVO-Indikatoren]")
+        print("\n❌ [DSGVO-Indikatoren]")
         for r in sorted(set(risks)):
             print(f"  ❌ {r}")
-
-    title, desc = extract_meta(html)
-    table = Table(show_header=False, title="GENERAL INFORMATION", title_style="bold green")
-    table.add_row("Title:", title)
-    table.add_row("Description:", desc if desc else "Keine Beschreibung gefunden")
-    table.add_row("URL:", url)
-    table.add_row("Software:", "Unbekannt")  # Placeholder
-    console.print(table)
-
-    print("\n⚙️  Software:")
-    if software:
-        for s in software:
-            print(f"  - {s}")
-    else:
-        print("  Keine Tracker erkannt")
-
-    if cookie_banner_detected:
-        if cookie_tool_name:
-            console.print(f"\n🍪 [bold yellow]Cookie-Banner erkannt:[/bold yellow] {cookie_tool_name}")
-        else:
-            console.print("\n🍪 [bold yellow]Cookie-Banner erkannt[/bold yellow]")
-    else:
-        console.print("\n❌ [red]Kein Cookie-Banner erkannt[/red]")
-
-    cms_list, builder_list = detect_cms(html)
-    theme = detect_wordpress_theme(html)
-    if cms_list or theme or builder_list:
-        print("\n🧱 CMS / Builder:")
-        if cms_list:
-            print(f"  CMS: {', '.join(cms_list)}")
-        if theme:
-            print(f"  Theme: {theme}")
-        if builder_list:
-            print(f"  Page-Builder: {', '.join(builder_list)}")
-    else:
-        print("\n🧱 Kein CMS oder Page-Builder erkannt")
 
     print("\n🔐 SSL-Zertifikat:")
     ssl_info = get_ssl_info(domain)
