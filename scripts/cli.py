@@ -9,6 +9,24 @@ from rich.table import Table
 from rich.panel import Panel
 import hashlib
 from core import detect_software
+from playwright.sync_api import sync_playwright
+import json
+
+network_requests = []
+
+def fetch_html_and_requests(url):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+
+        # Netzwerk-Request-Logger
+        page.on("request", lambda request: network_requests.append(request.url))
+
+        page.goto(url, wait_until="load", timeout=20000)
+        page.wait_for_timeout(2000)
+        content = page.content()
+        browser.close()
+        return content
 
 def get_ssl_info(domain):
     try:
@@ -69,7 +87,7 @@ def main():
     domain = urlparse(url).hostname
 
     print("\n🔍 Lade Seite...")
-    html = fetch_html(url)
+    html = fetch_html_and_requests(url)
     if not html:
         return
 
@@ -83,6 +101,19 @@ def main():
 
     print("\n🛠️  Erkannte Software/Tracker:")
     software = detect_software(html)
+
+    # Erweiterung: Prüfe auf Tracker in Netzwerk-Requests
+    external_trackers = []
+    with open("scripts/trackers.json", "r", encoding="utf-8") as f:
+        tracker_list = json.load(f)
+        for url in network_requests:
+            for tracker in tracker_list:
+                for pattern in tracker["match"]:
+                    if pattern.lower() in url.lower():
+                        external_trackers.append(tracker["name"])
+    external_trackers = sorted(set(external_trackers))
+    software = sorted(set(software + external_trackers))
+
     if software:
         for s in software:
             print(f"  - {s}")
