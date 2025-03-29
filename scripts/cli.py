@@ -211,7 +211,7 @@ def main():
     if pre_consent_violations:
         print("\n🚫 [Verstoß: Tracker vor Einwilligung geladen]")
         for r in pre_consent_violations:
-            print(f"  ❌ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            print(f"  ‼️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
                 print(f"     Grund: {r['note']}")
 
@@ -231,7 +231,7 @@ def main():
     if matched_risks:
         print("\n🚨 [DSGVO-Risiken laut RiskMap]")
         for r in matched_risks:
-            print(f"  ❌ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            print(f"  ⚠️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
                 print(f"     Grund: {r['note']}")
 
