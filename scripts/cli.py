@@ -186,21 +186,7 @@ def main():
     table.add_row("Software:", "Unbekannt")  # Placeholder
     console.print(table)
 
-    print("\n🛠️  Erkannte Software/Tracker:")
-    software = detect_software(html)
-
-    # Erweiterung: Prüfe auf Tracker in Netzwerk-Requests
-    external_trackers = []
-    with open("scripts/trackers.json", "r", encoding="utf-8") as f:
-        tracker_list = json.load(f)
-        for url in network_requests:
-            for tracker in tracker_list:
-                for pattern in tracker["match"]:
-                    if pattern.lower() in url.lower():
-                        external_trackers.append(tracker["name"])
-    external_trackers = sorted(set(external_trackers))
-    software = sorted(set(software + external_trackers))
-
+    print("\n⚙️  Software:")
     if software:
         for s in software:
             print(f"  - {s}")
@@ -215,18 +201,18 @@ def main():
     else:
         console.print("\n❌ [red]Kein Cookie-Banner erkannt[/red]")
 
-    print("\n🎨 WordPress Theme:")
-    theme = detect_wordpress_theme(html)
-    print(f"  Theme: {theme}" if theme else "  Kein WordPress-Theme gefunden")
-
     cms_list, builder_list = detect_cms(html)
-    if cms_list:
-        console.print(f"\n🧩 [bold cyan]CMS erkannt:[/bold cyan] {', '.join(cms_list)}")
+    theme = detect_wordpress_theme(html)
+    if cms_list or theme or builder_list:
+        print("\n🧱 CMS / Builder:")
+        if cms_list:
+            print(f"  CMS: {', '.join(cms_list)}")
+        if theme:
+            print(f"  Theme: {theme}")
+        if builder_list:
+            print(f"  Page-Builder: {', '.join(builder_list)}")
     else:
-        console.print(f"\n🧩 [cyan]Kein CMS erkannt[/cyan]")
-
-    if builder_list:
-        console.print(f"\n🔧 [bold magenta]Page-Builder erkannt:[/bold magenta] {', '.join(builder_list)}")
+        print("\n🧱 Kein CMS oder Page-Builder erkannt")
 
     print("\n🔐 SSL-Zertifikat:")
     ssl_info = get_ssl_info(domain)
