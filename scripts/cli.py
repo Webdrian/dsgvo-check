@@ -301,6 +301,44 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
 
+    # Abschnitt: 6. Cookies
+    console.print("\n[bold magenta]6. Cookies gesetzt[/bold magenta]")
+
+    cookies = []
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+            page.goto(url, timeout=20000)
+            page.wait_for_timeout(3000)
+            cookies = context.cookies()
+            browser.close()
+    except Exception as e:
+        cookies = []
+
+    if cookies:
+        cookie_table = Table(title="Gesetzte Cookies", show_lines=True)
+        cookie_table.add_column("Name", style="bold")
+        cookie_table.add_column("Domain")
+        cookie_table.add_column("Path")
+        cookie_table.add_column("Expires")
+        cookie_table.add_column("Secure")
+        cookie_table.add_column("HttpOnly")
+
+        for c in cookies:
+            name = c.get("name", "")
+            domain = c.get("domain", "")
+            path = c.get("path", "")
+            expires = str(c.get("expires", ""))
+            secure = str(c.get("secure", ""))
+            http_only = str(c.get("httpOnly", ""))
+            cookie_table.add_row(name, domain, path, expires, secure, http_only)
+
+        console.print(cookie_table)
+    else:
+        console.print("Keine Cookies erkannt.")
+
     # Abschnitt: 5. E-Mail-Sicherheitsprüfung
     console.print("\n[bold blue]5. E-Mail-Sicherheit[/bold blue]")
 
