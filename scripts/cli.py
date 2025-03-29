@@ -282,5 +282,14 @@ def main():
         ssl_table.add_row("FP SHA-256:", ssl_info['sha256'])
         console.print(ssl_table)
 
+    # Ampel-Logik basierend auf erkannten Risiken
+    total_risks = len(risks) + len(matched_risks)
+    if total_risks == 0:
+        console.print("\n🟢 [bold green]DSGVO-Ampel: Keine erkannten Risiken[/bold green]")
+    elif total_risks <= 2:
+        console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_risks} mögliche Probleme erkannt[/bold yellow]")
+    else:
+        console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_risks} Risiken erkannt – genau prüfen![/bold red]")
+
 if __name__ == "__main__":
     main()
