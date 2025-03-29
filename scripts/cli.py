@@ -274,23 +274,23 @@ def main():
     console.print("\n[bold red]4. DSGVO-Check[/bold red]")
 
     if matched_risks:
-        print("\n⚠️ [Risiken laut RiskMap]")
+        console.print("\n[bold yellow]⚠️ Risiken laut RiskMap:[/bold yellow]")
         for r in matched_risks:
-            print(f"  ⚠️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            console.print(f"  ⚠️ [bold]{r['name']}[/bold]  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
-                print(f"     Grund: {r['note']}")
+                console.print(f"     [dim]Grund:[/dim] {r['note']}")
 
     if pre_consent_violations:
-        print("\❗️ [Verstoß: Tracker vor Einwilligung geladen]")
+        console.print("\n[bold red]❗️ Verstöße: Tracker vor Einwilligung geladen[/bold red]")
         for r in pre_consent_violations:
-            print(f"  ❗️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            console.print(f"  ❗️ [bold]{r['name']}[/bold]  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
-                print(f"     Grund: {r['note']}")
+                console.print(f"     [dim]Grund:[/dim] {r['note']}")
 
     if risks:
-        print("\n❌ [DSGVO-Indikatoren]")
+        console.print("\n[bold red]❌ Weitere DSGVO-Indikatoren:[/bold red]")
         for r in sorted(set(risks)):
-            print(f"  ❌ {r}")
+            console.print(f"  ❌ {r}")
 
     # Ampel direkt darunter anzeigen
     total_risks = len(risks) + len(matched_risks) + len(pre_consent_violations)
