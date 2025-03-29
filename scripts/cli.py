@@ -15,19 +15,53 @@ import json
 network_requests = []
 cookie_banner_detected = False
 cookie_tool_name = None
+pre_consent_requests = []
 
 def fetch_html_and_requests(url):
-    global cookie_banner_detected
+    global cookie_banner_detected, cookie_tool_name, network_requests, pre_consent_requests
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        page.on("request", lambda request: network_requests.append(request.url))
+        # Phase A: vor Consent-Klick
+        temp_requests = []
+        page.on("request", lambda request: temp_requests.append(request.url))
 
         page.goto(url, wait_until="load", timeout=20000)
+        page.wait_for_timeout(3000)
 
+        html = page.content()
+
+        cookie_keywords = [
+            "akzeptieren", "alle cookies", "nur essenzielle", "cookie einstellungen",
+            "datenschutz", "zustimmen", "cookie-richtlinie", "tracking erlauben"
+        ]
+        cookie_banner_detected = any(word in html.lower() for word in cookie_keywords)
+
+        # Erkenne Cookie-Tool
+        known_tools = {
+            "Borlabs Cookie": ["borlabs-cookie", "borlabs-cookie-blocker"],
+            "Real Cookie Banner": ["real-cookie-banner"],
+            "Cookiebot": ["consent.cookiebot.com", "cookiebot"],
+            "Complianz": ["cmplz", "complianz.io"],
+            "CookieYes": ["cookieyes", "cookie-law-info"],
+            "OneTrust": ["onetrust", "optanon"],
+            "Usercentrics": ["usercentrics"],
+            "Didomi": ["didomi"]
+        }
+        for name, patterns in known_tools.items():
+            for pattern in patterns:
+                if pattern.lower() in html.lower():
+                    cookie_tool_name = name
+                    break
+            if cookie_tool_name:
+                break
+
+        # Speichere Requests vor Consent
+        pre_consent_requests = temp_requests.copy()
+
+        # Phase B: versuche Consent zu geben
         try:
-            # Cookie-Consent aktiv akzeptieren, wenn möglich
             selectors = [
                 "text=Alle akzeptieren",
                 "text=Zustimmen",
@@ -45,38 +79,11 @@ def fetch_html_and_requests(url):
         except:
             pass
 
-        page.wait_for_timeout(7000)  # längere Wartezeit für dynamisch geladene Tracker
-
+        # Phase B: neue Requests nach Klick sammeln
+        network_requests = []
+        page.on("request", lambda request: network_requests.append(request.url))
+        page.wait_for_timeout(5000)
         html = page.content()
-
-        cookie_keywords = [
-            "akzeptieren", "alle cookies", "nur essenzielle", "cookie einstellungen",
-            "datenschutz", "zustimmen", "cookie-richtlinie", "tracking erlauben"
-        ]
-        cookie_banner_detected = any(
-            word in html.lower() for word in cookie_keywords
-        )
-        
-        # Versuche bekannte Cookie-Tools zu erkennen
-        known_tools = {
-            "Borlabs Cookie": ["borlabs-cookie", "borlabs-cookie-blocker"],
-            "Real Cookie Banner": ["real-cookie-banner"],
-            "Cookiebot": ["consent.cookiebot.com", "cookiebot"],
-            "Complianz": ["cmplz", "complianz.io"],
-            "CookieYes": ["cookieyes", "cookie-law-info"],
-            "OneTrust": ["onetrust", "optanon"],
-            "Usercentrics": ["usercentrics"],
-            "Didomi": ["didomi"]
-        }
-
-        for name, patterns in known_tools.items():
-            for pattern in patterns:
-                if pattern.lower() in html.lower():
-                    global cookie_tool_name
-                    cookie_tool_name = name
-                    break
-            if cookie_tool_name:
-                break
 
         browser.close()
         return html
