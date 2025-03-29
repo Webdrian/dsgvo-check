@@ -179,6 +179,33 @@ def main():
     if not html:
         return
 
+    # DSGVO-Risiko-Indikatoren
+    risks = []
+    lower_network = [r.lower() for r in network_requests]
+
+    if not cookie_banner_detected and software:
+        risks.append("Tracker ohne Einwilligung")
+
+    if any("googletagmanager" in r for r in lower_network) and not cookie_banner_detected:
+        risks.append("Google-Tools ohne Einwilligung")
+
+    if any("googleapis.com" in r for r in lower_network):
+        risks.append("Google Schriftarten (extern)")
+
+    if any("vimeo.com" in r for r in lower_network):
+        risks.append("Vimeo Video")
+
+    if any("activecampaign" in r for r in lower_network):
+        risks.append("ActiveCampaign")
+
+    if any(x in r for r in lower_network for x in ["cdn.", "player.", "embed.", "font.", "video."]):
+        risks.append("Externe Dateien")
+
+    if risks:
+        print("\n🚨 [DSGVO-Indikatoren]")
+        for r in sorted(set(risks)):
+            print(f"  ❌ {r}")
+
     title, desc = extract_meta(html)
     table = Table(show_header=False, title="GENERAL INFORMATION", title_style="bold green")
     table.add_row("Title:", title)
