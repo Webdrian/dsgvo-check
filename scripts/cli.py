@@ -13,20 +13,31 @@ from playwright.sync_api import sync_playwright
 import json
 
 network_requests = []
+cookie_banner_detected = False
 
 def fetch_html_and_requests(url):
+    global cookie_banner_detected
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        # Netzwerk-Request-Logger
         page.on("request", lambda request: network_requests.append(request.url))
 
         page.goto(url, wait_until="load", timeout=20000)
-        page.wait_for_timeout(2000)
-        content = page.content()
+        page.wait_for_timeout(5000)
+
+        html = page.content()
+
+        cookie_keywords = [
+            "akzeptieren", "alle cookies", "nur essenzielle", "cookie einstellungen",
+            "datenschutz", "zustimmen", "cookie-richtlinie", "tracking erlauben"
+        ]
+        cookie_banner_detected = any(
+            word in html.lower() for word in cookie_keywords
+        )
+
         browser.close()
-        return content
+        return html
 
 def get_ssl_info(domain):
     try:
@@ -119,6 +130,11 @@ def main():
             print(f"  - {s}")
     else:
         print("  Keine Tracker erkannt")
+
+    if cookie_banner_detected:
+        console.print("\n🍪 [bold yellow]Cookie-Banner erkannt[/bold yellow]")
+    else:
+        console.print("\n✅ [green]Kein Cookie-Banner erkannt[/green]")
 
     print("\n🎨 WordPress Theme:")
     theme = detect_wordpress_theme(html)
