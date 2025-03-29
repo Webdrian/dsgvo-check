@@ -195,7 +195,8 @@ def main():
                 matched_risks.append({
                     "name": entry["name"],
                     "category": entry["category"],
-                    "risk": entry["risk"]
+                    "risk": entry["risk"],
+                    "note": entry.get("note", "")
                 })
                 break
 
@@ -203,6 +204,8 @@ def main():
         print("\n🚨 [DSGVO-Risiken laut RiskMap]")
         for r in matched_risks:
             print(f"  ❌ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            if r["note"]:
+                print(f"     Grund: {r['note']}")
 
     # DSGVO-Risiko-Indikatoren
     risks = []
