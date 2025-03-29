@@ -126,7 +126,7 @@ def detect_cms(html):
 
     builder_patterns = {
         "Elementor": ["elementor"],
-        "Divi": ["et_pb_", "divi"]
+        "Divi": ["et_pb_section", "et_pb_module", "et_pb_row", "et_pb_column"]
     }
 
     cms_found = []
