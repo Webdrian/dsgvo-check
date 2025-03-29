@@ -179,6 +179,7 @@ def main():
     console = Console()
     url = input("Gib eine URL ein (mit https://): ").strip()
     domain = urlparse(url).hostname
+    risks = []
 
     print("\n🔍 Lade Seite...")
     html = fetch_html_and_requests(url)
