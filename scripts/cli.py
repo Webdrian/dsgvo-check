@@ -281,9 +281,9 @@ def main():
                 print(f"     Grund: {r['note']}")
 
     if pre_consent_violations:
-        print("\n‼️ [Verstoß: Tracker vor Einwilligung geladen]")
+        print("\❗️ [Verstoß: Tracker vor Einwilligung geladen]")
         for r in pre_consent_violations:
-            print(f"  ‼️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
+            print(f"  ❗️ {r['name']}  →  {r['category']} (Risiko: {r['risk']})")
             if r["note"]:
                 print(f"     Grund: {r['note']}")
 
