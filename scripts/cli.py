@@ -20,7 +20,12 @@ def get_ssl_info(domain):
                 return {
                     "valid_from": valid_from,
                     "valid_to": valid_to,
-                    "issuer": issuer.get("O", "Unbekannt")
+                    "issuer": issuer.get("O", "Unbekannt"),
+                    "org_cn": issuer.get("CN", "Unbekannt"),
+                    "common_name": cert.get("subject", [["commonName", "Unbekannt"]])[0][1],
+                    "serial": cert.get("serialNumber", "N/A"),
+                    "sha1": ssock.getpeercert(True).hex(),
+                    "sha256": "Not available via socket"  # Optional: mit OpenSSL ersetzen
                 }
     except Exception as e:
         return {"error": str(e)}
@@ -103,9 +108,14 @@ def main():
         console.print(f"[red]SSL-Fehler:[/red] {ssl_info['error']}")
     else:
         ssl_table = Table(show_header=False, title="SSL CERTIFICATE", title_style="bold green")
-        ssl_table.add_row("Issuer:", ssl_info['issuer'])
+        ssl_table.add_row("Common Name:", ssl_info.get("common_name", ""))
+        ssl_table.add_row("Organization:", ssl_info.get("issuer", ""))
+        ssl_table.add_row("Organization CN:", ssl_info.get("org_cn", ""))
         ssl_table.add_row("Valid from:", ssl_info['valid_from'])
         ssl_table.add_row("Valid to:", ssl_info['valid_to'])
+        ssl_table.add_row("Serial Number:", ssl_info.get("serial", ""))
+        ssl_table.add_row("FP SHA-1:", ssl_info.get("sha1", ""))
+        ssl_table.add_row("FP SHA-256:", ssl_info.get("sha256", ""))
         console.print(ssl_table)
 
 if __name__ == "__main__":
