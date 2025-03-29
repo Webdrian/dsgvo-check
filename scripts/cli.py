@@ -345,6 +345,8 @@ def main():
             console.print("\n[bold red]⚠️ Verdächtige Cookies erkannt:[/bold red]")
             for sc in suspicious_cookies:
                 console.print(f"  ⚠️ {sc}")
+            # DSGVO-Ampel mitverdacht erhöhen
+            risks.append("Verdächtige Cookies gesetzt (z. B. Tracking ohne Einwilligung möglich)")
     else:
         console.print("Keine Cookies erkannt.")
 
