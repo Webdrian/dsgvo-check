@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 import hashlib
+from scripts.core import detect_software
 
 def get_ssl_info(domain):
     try:
@@ -61,20 +62,6 @@ def detect_wordpress_theme(html):
         theme = html[start:end]
         return theme
     return None
-
-def detect_software(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    scripts = soup.find_all("script", src=True)
-    found = []
-    for script in scripts:
-        src = script["src"]
-        if "gtag/js" in src or "analytics.js" in src:
-            found.append("Google Analytics")
-        elif "facebook.net" in src:
-            found.append("Facebook Pixel")
-        elif "hotjar.com" in src:
-            found.append("Hotjar")
-    return list(set(found))
 
 def main():
     console = Console()

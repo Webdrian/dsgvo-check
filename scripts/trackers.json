@@ -1,0 +1,8 @@
+[
+    { "name": "Google Analytics", "match": ["gtag/js", "analytics.js"] },
+    { "name": "Facebook Pixel", "match": ["facebook.net"] },
+    { "name": "Hotjar", "match": ["hotjar.com"] },
+    { "name": "Matomo", "match": ["matomo.js"] },
+    { "name": "Microsoft Clarity", "match": ["clarity.ms"] },
+    { "name": "Google Tag Manager", "match": ["tagmanager"] }
+  ]
