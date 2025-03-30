@@ -3,7 +3,6 @@ import json
 
 def analyze_cookies(url):
     from rich.console import Console
-    from rich.table import Table
 
     console = Console()
     cookies_before = []
@@ -16,7 +15,7 @@ def analyze_cookies(url):
             cookie_db = json.load(f)
     except Exception as e:
         console.print(f"[bold red]Fehler beim Laden von cookies.json:[/bold red] {e}")
-        return [], [], []
+        return [], [], [], []
 
     def find_cookie_info(name):
         for entry in cookie_db:
@@ -52,7 +51,7 @@ def analyze_cookies(url):
             browser.close()
     except Exception as e:
         console.print(f"Fehler beim Cookie-Check: {e}")
-        return [], [], []
+        return [], [], [], []
 
     # Verdächtige Cookies analysieren
     for c in cookies_before:
@@ -60,7 +59,14 @@ def analyze_cookies(url):
         if info and info["category"] in ["Analyse", "Marketing"]:
             suspicious.append(c.get("name", ""))
 
-    return cookies_before, cookies_after, suspicious
+    tools_detected = list(set(
+        find_cookie_info(c.get("name", "")).get("tool", "?")
+        for c in cookies_after
+        if find_cookie_info(c.get("name", ""))
+        and find_cookie_info(c.get("name", "")).get("tool")
+    ))
+
+    return cookies_before, cookies_after, suspicious, tools_detected
 
 def load_cookie_db():
     try:

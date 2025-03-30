@@ -101,42 +101,29 @@ def main():
     else:
         console.print("[red]❌ Kein Cookie-Banner erkannt[/red]")
 
-    if cookies_before:
-        pre_table = Table(title="Cookies vor Zustimmung", show_lines=True)
-        pre_table.add_column("Name", style="bold")
-        pre_table.add_column("Domain")
-        pre_table.add_column("Pfad")
-        for cookie in cookies_before:
-            pre_table.add_row(
-                cookie.get("name", "?"),
-                cookie.get("domain", "?"),
-                cookie.get("path", "?")
-            )
-        console.print(pre_table)
-
+    console.print(f"\n[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
     if suspicious:
-        console.print("[red]🚨 Verdächtige Cookies vor Zustimmung:[/red]")
+        console.print("🚨 [red]Auffällige Cookies vor Zustimmung:[/red]")
         for s in suspicious:
-            console.print(f"  🚨 {s}")
+            console.print(f"  • {s}")
 
-    if cookies_after:
-        post_table = Table(title="Cookies nach Zustimmung", show_lines=True)
-        post_table.add_column("Name", style="bold")
-        post_table.add_column("Domain")
-        post_table.add_column("Pfad")
-        post_table.add_column("Expires")
-        post_table.add_column("Secure")
-        post_table.add_column("HttpOnly")
-        for cookie in cookies_after:
-            post_table.add_row(
-                cookie.get("name", "?"),
-                cookie.get("domain", "?"),
-                cookie.get("path", "?"),
-                str(cookie.get("expires", "?")),
-                str(cookie.get("secure", "?")),
-                str(cookie.get("httpOnly", "?"))
-            )
-        console.print(post_table)
+    console.print(f"\n[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
+    known_tools = set()
+    for cookie in cookies_after:
+        name = cookie.get("name", "").lower()
+        if "ga" in name:
+            known_tools.add("Google Analytics")
+        if "fbp" in name or "facebook" in name:
+            known_tools.add("Facebook Pixel")
+        if "borlabs" in name:
+            known_tools.add("Borlabs Cookie")
+        if "cfuid" in name or "vimeo" in cookie.get("domain", ""):
+            known_tools.add("Vimeo")
+
+    if known_tools:
+        console.print("🔍 Verwendete Tools:")
+        for tool in known_tools:
+            console.print(f"  • {tool}")
 
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
