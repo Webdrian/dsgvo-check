@@ -125,9 +125,9 @@ def main():
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
     email_security = {
-        "spf": raw_email_security.get("spf", [{}])[0] if isinstance(raw_email_security.get("spf"), list) else raw_email_security.get("spf", {"status": False, "score": 0}),
-        "dkim": raw_email_security.get("dkim", [{}])[0] if isinstance(raw_email_security.get("dkim"), list) else raw_email_security.get("dkim", {"status": False, "score": 0}),
-        "dmarc": raw_email_security.get("dmarc", [{}])[0] if isinstance(raw_email_security.get("dmarc"), list) else raw_email_security.get("dmarc", {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
+        "spf": (raw_email_security.get("spf", [{}])[0] if isinstance(raw_email_security.get("spf"), list) and raw_email_security.get("spf") else {"status": False, "score": 0}),
+        "dkim": (raw_email_security.get("dkim", [{}])[0] if isinstance(raw_email_security.get("dkim"), list) and raw_email_security.get("dkim") else {"status": False, "score": 0}),
+        "dmarc": (raw_email_security.get("dmarc", [{}])[0] if isinstance(raw_email_security.get("dmarc"), list) and raw_email_security.get("dmarc") else {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
         "score": raw_email_security.get("score", 0),
         "rating": raw_email_security.get("rating", "Keine Bewertung verfügbar"),
     }
