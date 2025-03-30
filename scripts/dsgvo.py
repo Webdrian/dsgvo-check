@@ -1,12 +1,12 @@
 import json
 
-def evaluate_risks(url, network_requests, pre_consent_requests):
+def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="scripts/json/riskmap.json"):
     matched_risks = []
     pre_consent_violations = []
     other_risks = []
 
     try:
-        with open("scripts/riskmap.json", "r", encoding="utf-8") as f:
+        with open(riskmap_path, "r", encoding="utf-8") as f:
             riskmap = json.load(f)
     except Exception as e:
         print(f"Fehler beim Laden von riskmap.json: {e}")
