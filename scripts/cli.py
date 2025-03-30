@@ -30,7 +30,6 @@ def main():
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
     console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}\n")
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
@@ -44,15 +43,14 @@ def main():
             console.print(f"  • {plugin}")
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt\n")
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: Tracker
-    console.print("\n")  # Fügt oben einen Abstand hinzu
+    console.print("\n")
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
     with open('scripts/json/trackers.json', 'r', encoding='utf-8') as f:
         trackers = json.load(f)
 
-    detected_trackers = set()  # Verwende ein Set, um Duplikate zu vermeiden
+    detected_trackers = set()
 
     if network_requests:
         console.print("\n[yellow]⚠️ Tracker erkannt:[/yellow]")
@@ -61,18 +59,15 @@ def main():
                 if any(match.lower() in request.lower() for request in network_requests):
                     detected_trackers.add(tracker['name'])
 
-        # Ausgabe der Tracker ohne Duplikate
         for tracker in detected_trackers:
             console.print(f"  • {tracker}")
 
-    console.print("\n")  # Fügt unten einen Abstand hinzu
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
+    console.print("\n")
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
 
-    # Mehr Abstand und korrekte Reihenfolge
     if risks:
         console.print("\n[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
         for r in risks:
@@ -90,7 +85,6 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
-    # Füge eine einzige Leerzeile nach der DSGVO-Ampel ein
     console.print("\n")
 
     if indicators:
@@ -99,8 +93,6 @@ def main():
             console.print(f"  ❌ {i}")
     if not any([risks, violations, indicators]):
         console.print("[green]Keine DSGVO-Probleme erkannt.[/green]\n")
-
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
@@ -120,7 +112,7 @@ def main():
         console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.\n")
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
+    console.print("\n")
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
@@ -132,7 +124,7 @@ def main():
     else:
         console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
     
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
+    console.print("\n")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
@@ -144,7 +136,7 @@ def main():
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
         console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]\n")
-    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
+    console.print("\n")
 
 if __name__ == "__main__":
     main()
