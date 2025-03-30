@@ -24,11 +24,13 @@ def main():
     email_security = check_email_security(domain)
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
+    # Abschnitt: Allgemeine Informationen
     console.rule("[bold green]1. Allgemeine Informationen[/bold green]")
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
     console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}")
 
+    # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
     console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
@@ -40,16 +42,16 @@ def main():
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt")
 
+    # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
     if network_requests:
         console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
         for request in network_requests:
-            # Extrahiere nur die Domain der URL
             domain = urlparse(request).hostname
-            # Optional: Beschränke die URL auf wichtige Parameter
             clean_url = f"{domain} - {urlparse(request).path}"
             console.print(f"  {clean_url}")
 
+    # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
     if total_issues == 0:
@@ -74,6 +76,7 @@ def main():
     if not any([risks, violations, indicators]):
         console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
 
+    # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
     if cookie_tool:
         console.print(f"[bold]Erkanntes Cookie-Tool:[/bold] {cookie_tool}")
@@ -92,6 +95,7 @@ def main():
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
 
+    # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     for prot, records in email_security.items():
         if any("v=" in r for r in records):
@@ -110,6 +114,7 @@ def main():
     else:
         console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
 
+    # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
     if ssl_info and "error" not in ssl_info:
         console.print(f"Issuer: {ssl_info['issuer']}")
