@@ -28,6 +28,23 @@ def main():
     raw_email_security = check_email_security(domain)
     if isinstance(raw_email_security, list):
         raw_email_security = raw_email_security[0] if raw_email_security else {}
+    
+    raw_spf = raw_email_security.get("spf", [])
+    raw_dkim = raw_email_security.get("dkim", [])
+    raw_dmarc = raw_email_security.get("dmarc", [])
+
+    spf = raw_spf[0] if isinstance(raw_spf, list) and raw_spf else {"status": False, "score": 0}
+    dkim = raw_dkim[0] if isinstance(raw_dkim, list) and raw_dkim else {"status": False, "score": 0}
+    dmarc = raw_dmarc[0] if isinstance(raw_dmarc, list) and raw_dmarc else {"status": False, "score": 0, "policy": "Keine Policy gefunden"}
+
+    email_security = {
+        "spf": spf,
+        "dkim": dkim,
+        "dmarc": dmarc,
+        "score": raw_email_security.get("score", 0),
+        "rating": raw_email_security.get("rating", "Keine Bewertung verfügbar"),
+    }
+
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
     # Abschnitt: Allgemeine Informationen
@@ -123,14 +140,6 @@ def main():
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-
-    email_security = {
-        "spf": (raw_email_security.get("spf", [{}])[0] if isinstance(raw_email_security.get("spf"), list) and raw_email_security.get("spf") else {"status": False, "score": 0}),
-        "dkim": (raw_email_security.get("dkim", [{}])[0] if isinstance(raw_email_security.get("dkim"), list) and raw_email_security.get("dkim") else {"status": False, "score": 0}),
-        "dmarc": (raw_email_security.get("dmarc", [{}])[0] if isinstance(raw_email_security.get("dmarc"), list) and raw_email_security.get("dmarc") else {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
-        "score": raw_email_security.get("score", 0),
-        "rating": raw_email_security.get("rating", "Keine Bewertung verfügbar"),
-    }
 
     spf_status = email_security["spf"]["status"]
     dkim_status = email_security["dkim"]["status"]
