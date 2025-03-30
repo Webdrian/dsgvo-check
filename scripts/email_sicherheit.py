@@ -18,30 +18,47 @@ def render_email_security(email_security):
     lines = []
     lines.append("[bold blue]5. E-Mail-Sicherheit[/bold blue]")
 
-    if any("v=" in r for r in email_security.get("SPF", [])):
-        lines.append("✅ [green]SPF vorhanden[/green]")
+    # Erweiterter Score: 0–10
+    score = 0
+
+    # SPF Check
+    spf_records = email_security.get("SPF", [])
+    if any("v=spf1" in r for r in spf_records):
+        score += 3
+        if any("+all" not in r and "~all" in r for r in spf_records):
+            score += 1
     else:
         lines.append("❌ [red]SPF fehlt oder falsch konfiguriert[/red]")
 
-    if any("v=" in r for r in email_security.get("DKIM", [])):
-        lines.append("✅ [green]DKIM vorhanden[/green]")
+    # DKIM Check
+    dkim_records = email_security.get("DKIM", [])
+    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
+        score += 3
     else:
         lines.append("❌ [red]DKIM fehlt oder falsch konfiguriert[/red]")
 
-    if any("v=" in r for r in email_security.get("DMARC", [])):
-        lines.append("✅ [green]DMARC vorhanden[/green]")
+    # DMARC Check
+    dmarc_records = email_security.get("DMARC", [])
+    if any("v=DMARC1" in r for r in dmarc_records):
+        score += 3
+        if any("p=reject" in r or "p=quarantine" in r for r in dmarc_records):
+            score += 1
     else:
         lines.append("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
 
-    score = sum(1 for key in ["SPF", "DKIM", "DMARC"] if any("v=" in r for r in email_security.get(key, [])))
+    if score >= 9:
+        level = "Sehr gut"
+        icon = "🟢"
+    elif score >= 6:
+        level = "Gut"
+        icon = "🟡"
+    elif score >= 3:
+        level = "Schwach"
+        icon = "🟠"
+    else:
+        level = "Kritisch"
+        icon = "🔴"
 
-    rating_text = {
-        3: "Sehr gut geschützt",
-        2: "Gut, aber Verbesserung möglich",
-        1: "Schwach abgesichert",
-        0: "Keine Schutzmaßnahmen erkannt"
-    }
-
-    lines.append(f"🛡️ [yellow]Gesamtbewertung: {score}/3 – {rating_text[score]}[/yellow]")
+    lines.append(f"{icon} [bold]Gesamtbewertung: {score}/10 – {level}[/bold]")
     lines.append("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
     return lines
