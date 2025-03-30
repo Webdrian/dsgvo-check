@@ -122,14 +122,15 @@ def main():
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
-    email_security = check_email_security(domain)
+    spf_status = email_security.get("spf", {}).get("status", False)
+    dkim_status = email_security.get("dkim", {}).get("status", False)
+    dmarc_data = email_security.get("dmarc", {})
+    dmarc_status = dmarc_data.get("status", False)
+    dmarc_policy = dmarc_data.get("policy", "Keine Policy gefunden")
 
-    console.print("✅ SPF vorhanden" if email_security["spf"]["status"] else "❌ SPF fehlt")
-    console.print("✅ DKIM vorhanden" if email_security["dkim"]["status"] else "❌ DKIM fehlt oder falsch konfiguriert")
-    if email_security["dmarc"]["status"]:
-        console.print(f"✅ DMARC vorhanden (Policy: {email_security['dmarc']['policy']})")
-    else:
-        console.print("❌ DMARC fehlt oder falsch konfiguriert")
+    console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
+    console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
+    console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
     console.print()
 
     console.print(f"🔐 Gesamtbewertung: [bold]{email_security['score']}/10 – {email_security['rating']}[/bold]")
