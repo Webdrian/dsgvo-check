@@ -20,7 +20,7 @@ def main():
     plugins = detect_plugins(html)
     ssl_info = get_ssl_info(domain)
     cookies_before, cookies_after, suspicious = analyze_cookies(url)
-    load_cookie_db("scripts/json/cookies.json")
+    cookie_db = load_cookie_db()
     email_security = check_email_security(domain)
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
