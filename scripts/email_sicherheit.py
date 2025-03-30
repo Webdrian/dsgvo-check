@@ -24,25 +24,33 @@ def render_email_security(email_security):
     # SPF Check
     spf_records = email_security.get("SPF", [])
     if any("v=spf1" in r for r in spf_records):
-        score += 3
+        score += 1
         if any("+all" not in r and "~all" in r for r in spf_records):
-            score += 1
+            score += 2
+        else:
+            lines.append("⚠️ [orange3]SPF vorhanden, aber keine empfohlene Policy (~all)[/orange3]")
     else:
         lines.append("❌ [red]SPF fehlt oder falsch konfiguriert[/red]")
 
     # DKIM Check
     dkim_records = email_security.get("DKIM", [])
-    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
-        score += 3
+    if any("v=DKIM1" in r for r in dkim_records):
+        score += 1
+        if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
+            score += 2
+        else:
+            lines.append("⚠️ [orange3]DKIM vorhanden, aber kein 'p=' Schlüssel gefunden[/orange3]")
     else:
         lines.append("❌ [red]DKIM fehlt oder falsch konfiguriert[/red]")
 
     # DMARC Check
     dmarc_records = email_security.get("DMARC", [])
     if any("v=DMARC1" in r for r in dmarc_records):
-        score += 3
+        score += 1
         if any("p=reject" in r or "p=quarantine" in r for r in dmarc_records):
-            score += 1
+            score += 2
+        else:
+            lines.append("⚠️ [orange3]DMARC vorhanden, aber keine starke Policy (reject/quarantine)[/orange3]")
     else:
         lines.append("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
 
