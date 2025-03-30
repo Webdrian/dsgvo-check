@@ -68,11 +68,10 @@ def render_email_security(email_security):
     # SPF
     spf_records = email_security.get("spf", {}).get("raw", [])
     if any("v=spf1" in r for r in spf_records):
-        spf_line = "✅ SPF vorhanden"
         if any("-all" in r for r in spf_records):
-            pass
+            spf_line = "✅ SPF vorhanden (Policy: -all)"
         elif any("~all" in r for r in spf_records):
-            spf_line += " (nur ~all)"
+            spf_line = "⚠️ [orange3]SPF vorhanden (nur ~all – Softfail)[/orange3]"
         else:
             spf_line = "⚠️ [orange3]SPF vorhanden, aber keine gültige Policy (~all oder -all)[/orange3]"
     else:
@@ -90,13 +89,14 @@ def render_email_security(email_security):
     # DMARC
     dmarc_records = email_security.get("dmarc", {}).get("raw", [])
     if any("v=DMARC1" in r for r in dmarc_records):
-        dmarc_line = "✅ DMARC vorhanden"
         if any("p=reject" in r for r in dmarc_records):
-            pass
+            dmarc_line = "✅ DMARC vorhanden (Policy: reject)"
         elif any("p=quarantine" in r for r in dmarc_records):
-            pass
+            dmarc_line = "⚠️ [orange3]DMARC vorhanden (Policy: quarantine – Softfail)[/orange3]"
+        elif any("p=none" in r for r in dmarc_records):
+            dmarc_line = "⚠️ [orange3]DMARC vorhanden (Policy: none – Keine Schutzwirkung)[/orange3]"
         else:
-            dmarc_line = "⚠️ [orange3]DMARC vorhanden, aber keine starke Policy (reject/quarantine)[/orange3]"
+            dmarc_line = "⚠️ [orange3]DMARC vorhanden, aber keine erkannte Policy[/orange3]"
     else:
         dmarc_line = "❌ [red]DMARC fehlt oder falsch konfiguriert[/red]"
     lines.append(dmarc_line)
