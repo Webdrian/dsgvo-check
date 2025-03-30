@@ -133,7 +133,9 @@ def main():
     console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
     console.print()
 
-    console.print(f"🔐 Gesamtbewertung: [bold]{email_security['score']}/10 – {email_security['rating']}[/bold]")
+    score = email_security.get("score", 0)
+    rating = email_security.get("rating", "Keine Bewertung verfügbar")
+    console.print(f"🔐 Gesamtbewertung: [bold]{score}/10 – {rating}[/bold]")
     console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
     console.print()
 
