@@ -56,15 +56,18 @@ def main():
 
     detected_trackers = set()
 
-    if network_requests:
-        console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
-        for tracker in trackers:
-            for match in tracker["match"]:
-                if any(match.lower() in request.lower() for request in network_requests):
-                    detected_trackers.add(tracker['name'])
+    for tracker in trackers:
+        for match in tracker["match"]:
+            if any(match.lower() in request.lower() for request in network_requests):
+                detected_trackers.add(tracker['name'])
 
+    if detected_trackers:
+        console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
         for tracker in sorted(detected_trackers):
             console.print(f"  • {tracker}")
+        console.print()
+    else:
+        console.print("✅ Keine Tracker erkannt")
         console.print()
 
     # Abschnitt: DSGVO-Check
