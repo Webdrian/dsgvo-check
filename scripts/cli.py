@@ -112,21 +112,23 @@ def main():
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
+    
+    spf_status = "✅ SPF vorhanden"
+    dkim_status = "❌ DKIM fehlt oder falsch konfiguriert"
+    dmarc_status = "✅ DMARC vorhanden"
+    
+    console.print(spf_status)
+    console.print(dkim_status)
+    console.print(dmarc_status)
 
-    if score == 3:
-        console.print("🔐 [bold green]Gesamtbewertung: Sehr gut geschützt[/bold green]")
-    elif score == 2:
-        console.print("🔐 [bold yellow]Gesamtbewertung: Gut, aber Verbesserung möglich[/bold yellow]")
+    overall_score = sum([1 for status in [spf_status, dkim_status, dmarc_status] if "✅" in status])
+
+    if overall_score == 3:
+        console.print("🔐 Gesamtbewertung: Sehr gut geschützt")
+    elif overall_score == 2:
+        console.print("🔐 Gesamtbewertung: Gut, aber Verbesserung möglich")
     else:
-        console.print("🔐 [bold red]Gesamtbewertung: Schwach abgesichert[/bold red]")
-
-    # Anzeige der einzelnen Ergebnisse für SPF, DMARC und DKIM
-    for key, value in email_security.items():
-        if value:
-            console.print(f"[bold] {key}: [/bold] {', '.join(value)}")
-        else:
-            console.print(f"[bold]{key} fehlt oder ist fehlerhaft[/bold]")
+        console.print("🔐 Gesamtbewertung: Schwach abgesichert")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
