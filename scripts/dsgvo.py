@@ -19,7 +19,8 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
                     "name": entry["name"],
                     "category": entry["category"],
                     "risk": entry["risk"],
-                    "note": entry.get("note", "")
+                    "note": entry.get("note", ""),
+                    "emoji": "🚨" if entry in pre_consent_violations else "⚠️"
                 })
                 break
 
@@ -30,7 +31,8 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
                     "name": entry["name"],
                     "category": entry["category"],
                     "risk": entry["risk"],
-                    "note": entry.get("note", "")
+                    "note": entry.get("note", ""),
+                    "emoji": "🚨" if entry in pre_consent_violations else "⚠️"
                 })
                 break
 

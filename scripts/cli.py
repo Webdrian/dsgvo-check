@@ -41,14 +41,22 @@ def main():
         console.print("[bold]Plugins:[/bold] Keine erkannt")
 
     console.rule("[bold magenta]3. DSGVO-Check[/bold magenta]")
+    total_issues = len(risks) + len(violations) + len(indicators)
+    if total_issues == 0:
+        console.print("\n🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
+    elif total_issues <= 2:
+        console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
+    else:
+        console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
+        
     if risks:
         console.print("[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
         for r in risks:
             console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
     if violations:
-        console.print("[red]‼️ Vor Einwilligung geladen:[/red]")
+        console.print("[red]🚨 Vor Einwilligung geladen:[/red]")
         for v in violations:
-            console.print(f"  ‼️ {v['name']} → {v['category']} (Risiko: {v['risk']})")
+            console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
         for i in indicators:
@@ -66,9 +74,9 @@ def main():
     if cookies_before:
         console.print(f"[bold]Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
     if suspicious:
-        console.print("[red]‼️ Verdächtige Cookies vor Zustimmung:[/red]")
+        console.print("[red]🚨 Verdächtige Cookies vor Zustimmung:[/red]")
         for s in suspicious:
-            console.print(f"  ‼️ {s}")
+            console.print(f"  🚨 {s}")
     if cookies_after:
         console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
     if not cookies_before and not cookies_after:
@@ -80,6 +88,17 @@ def main():
             console.print(f"✅ {prot} vorhanden")
         else:
             console.print(f"❌ {prot} fehlt oder falsch konfiguriert")
+    
+    score = 0
+    for prot, records in email_security.items():
+        if any("v=" in r for r in records):
+            score += 1
+    if score == 3:
+        console.print("🟢 [bold green]E-Mail-Ampel: Sehr gut geschützt[/bold green]")
+    elif score == 2:
+        console.print("🟡 [bold yellow]E-Mail-Ampel: Teilweise geschützt[/bold yellow]")
+    else:
+        console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
 
     console.rule("[bold white]6. SSL-Zertifikat[/bold white]")
     if ssl_info and "error" not in ssl_info:
