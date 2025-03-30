@@ -4,16 +4,18 @@ from ssl_info import get_ssl_info
 from cookies import analyze_cookies, load_cookie_db
 from email_sicherheit import check_email_security
 from dsgvo import evaluate_risks
-
 from urllib.parse import urlparse
 from rich.console import Console
 import json
 
+# Definieren der Console Instanz
+console = Console()
+
 def main():
-    console = Console()
     url = input("Gib eine URL ein (mit https://): ").strip()
     domain = urlparse(url).hostname
 
+    # Abruf der HTML-Daten, Cookies, etc.
     html, network_requests, pre_consent_requests, cookie_tool, cookie_banner = fetch_html_and_requests(url)
     title, desc = extract_meta(html)
     cms_list, builder_list = detect_cms(html)
@@ -108,23 +110,23 @@ def main():
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
 
-# Abschnitt: E-Mail-Sicherheit
-console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
+    # Abschnitt: E-Mail-Sicherheit
+    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
+    score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
 
-if score == 3:
-    console.print("🔐 [bold green]Gesamtbewertung: Sehr gut geschützt[/bold green]")
-elif score == 2:
-    console.print("🔐 [bold yellow]Gesamtbewertung: Gut, aber Verbesserung möglich[/bold yellow]")
-else:
-    console.print("🔐 [bold red]Gesamtbewertung: Schwach abgesichert[/bold red]")
-
-# Anzeige der einzelnen Ergebnisse für SPF, DMARC und DKIM
-for key, value in email_security.items():
-    if value:
-        console.print(f"[bold] {key}: [/bold] {', '.join(value)}")
+    if score == 3:
+        console.print("🔐 [bold green]Gesamtbewertung: Sehr gut geschützt[/bold green]")
+    elif score == 2:
+        console.print("🔐 [bold yellow]Gesamtbewertung: Gut, aber Verbesserung möglich[/bold yellow]")
     else:
-        console.print(f"[bold]{key} fehlt oder ist fehlerhaft[/bold]")
+        console.print("🔐 [bold red]Gesamtbewertung: Schwach abgesichert[/bold red]")
+
+    # Anzeige der einzelnen Ergebnisse für SPF, DMARC und DKIM
+    for key, value in email_security.items():
+        if value:
+            console.print(f"[bold] {key}: [/bold] {', '.join(value)}")
+        else:
+            console.print(f"[bold]{key} fehlt oder ist fehlerhaft[/bold]")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
@@ -136,6 +138,6 @@ for key, value in email_security.items():
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
         console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
-    
+
 if __name__ == "__main__":
     main()
