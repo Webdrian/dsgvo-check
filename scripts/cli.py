@@ -46,10 +46,10 @@ def main():
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
     if network_requests:
         console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
-        for request in network_requests:
-            domain = urlparse(request).hostname
-            clean_url = f"{domain} - {urlparse(request).path}"
-            console.print(f"  {clean_url}")
+        for tracker in trackers:  # 'trackers' ist die Liste von Tracker-Daten aus deiner 'trackers.json'
+            for match in tracker["match"]:
+                if any(match.lower() in request.lower() for request in network_requests):
+                    console.print(f"  • {tracker['name']}")
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
@@ -60,7 +60,7 @@ def main():
         console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
-        
+
     if risks:
         console.print("[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
         for r in risks:
@@ -97,16 +97,7 @@ def main():
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    for prot, records in email_security.items():
-        if any("v=" in r for r in records):
-            console.print(f"✅ {prot} vorhanden")
-        else:
-            console.print(f"❌ {prot} fehlt oder falsch konfiguriert")
-    
-    score = 0
-    for prot, records in email_security.items():
-        if any("v=" in r for r in records):
-            score += 1
+    score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
     if score == 3:
         console.print("🟢 [bold green]E-Mail-Ampel: Sehr gut geschützt[/bold green]")
     elif score == 2:
