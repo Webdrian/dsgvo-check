@@ -40,14 +40,14 @@ def main():
     console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
     console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
+    console.print()
     if plugins:
         console.print("[bold]Plugins:[/bold]")
         for plugin in plugins:
             console.print(f"  • {plugin}")
-        console.print()
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt")
-        console.print()
+    console.print()
 
     # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
@@ -63,9 +63,9 @@ def main():
                 if any(match.lower() in request.lower() for request in network_requests):
                     detected_trackers.add(tracker['name'])
 
-        for tracker in detected_trackers:
+        for tracker in sorted(detected_trackers):
             console.print(f"  • {tracker}")
-            console.print()
+        console.print()
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
@@ -122,7 +122,6 @@ def main():
     console.print(dkim_status)
     console.print(dmarc_status)
     console.print()
-
     overall_score = sum([1 for status in [spf_status, dkim_status, dmarc_status] if "✅" in status])
 
     rating_text = {
