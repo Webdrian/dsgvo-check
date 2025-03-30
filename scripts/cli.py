@@ -23,7 +23,7 @@ def main():
     theme = detect_wordpress_theme(html)
     plugins = detect_plugins(html)
     ssl_info = get_ssl_info(domain)
-    cookies_before, cookies_after, suspicious = analyze_cookies(url)
+    cookies_before, cookies_after, suspicious, tools_detected = analyze_cookies(url)
     cookie_db = load_cookie_db()
     email_security = check_email_security(domain)
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
@@ -108,17 +108,7 @@ def main():
             console.print(f"  • {s}")
 
     console.print(f"\n[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
-    known_tools = set()
-    for cookie in cookies_after:
-        name = cookie.get("name", "").lower()
-        if "ga" in name:
-            known_tools.add("Google Analytics")
-        if "fbp" in name or "facebook" in name:
-            known_tools.add("Facebook Pixel")
-        if "borlabs" in name:
-            known_tools.add("Borlabs Cookie")
-        if "cfuid" in name or "vimeo" in cookie.get("domain", ""):
-            known_tools.add("Vimeo")
+    known_tools = tools_detected
 
     if known_tools:
         console.print("🔍 Verwendete Tools:")
