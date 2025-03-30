@@ -6,6 +6,7 @@ from email_sicherheit import check_email_security
 from dsgvo import evaluate_risks
 from urllib.parse import urlparse
 from rich.console import Console
+from rich.table import Table
 import json
 
 # Definieren der Console Instanz
@@ -99,14 +100,44 @@ def main():
         console.print("[green]✅ Cookie-Banner erkannt[/green]")
     else:
         console.print("[red]❌ Kein Cookie-Banner erkannt[/red]")
+
     if cookies_before:
-        console.print(f"[bold]Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
+        pre_table = Table(title="Cookies vor Zustimmung", show_lines=True)
+        pre_table.add_column("Name", style="bold")
+        pre_table.add_column("Domain")
+        pre_table.add_column("Pfad")
+        for cookie in cookies_before:
+            pre_table.add_row(
+                cookie.get("name", "?"),
+                cookie.get("domain", "?"),
+                cookie.get("path", "?")
+            )
+        console.print(pre_table)
+
     if suspicious:
         console.print("[red]🚨 Verdächtige Cookies vor Zustimmung:[/red]")
         for s in suspicious:
             console.print(f"  🚨 {s}")
+
     if cookies_after:
-        console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
+        post_table = Table(title="Cookies nach Zustimmung", show_lines=True)
+        post_table.add_column("Name", style="bold")
+        post_table.add_column("Domain")
+        post_table.add_column("Pfad")
+        post_table.add_column("Expires")
+        post_table.add_column("Secure")
+        post_table.add_column("HttpOnly")
+        for cookie in cookies_after:
+            post_table.add_row(
+                cookie.get("name", "?"),
+                cookie.get("domain", "?"),
+                cookie.get("path", "?"),
+                str(cookie.get("expires", "?")),
+                str(cookie.get("secure", "?")),
+                str(cookie.get("httpOnly", "?"))
+            )
+        console.print(post_table)
+
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
 
