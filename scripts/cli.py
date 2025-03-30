@@ -26,6 +26,8 @@ def main():
     cookies_before, cookies_after, suspicious, tools_detected = analyze_cookies(url)
     cookie_db = load_cookie_db()
     raw_email_security = check_email_security(domain)
+    if isinstance(raw_email_security, list) and len(raw_email_security) == 1:
+        raw_email_security = raw_email_security[0]
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
     # Abschnitt: Allgemeine Informationen
