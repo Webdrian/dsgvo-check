@@ -76,7 +76,7 @@ def fetch_html_and_requests(url):
         html = page.content()
 
         browser.close()
-        return html
+        return html, network_requests, pre_consent_requests, cookie_tool_name, cookie_banner_detected
 
 def fetch_html(url):
     headers = {
