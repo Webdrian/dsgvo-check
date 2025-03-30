@@ -42,7 +42,7 @@ def main():
         for plugin in plugins:
             console.print(f"  • {plugin}")
     else:
-        console.print("[bold]Plugins:[/bold] Keine erkannt\n")
+        console.print("[bold]Plugins:[/bold] Keine erkannt")
 
     # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
@@ -89,7 +89,7 @@ def main():
         for i in indicators:
             console.print(f"  ❌ {i}")
     if not any([risks, violations, indicators]):
-        console.print("[green]Keine DSGVO-Probleme erkannt.[/green]\n")
+        console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
 
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
