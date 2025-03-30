@@ -34,10 +34,13 @@ def check_email_security(domain):
         if any("v=DKIM1" in r for r in records):
             dkim_records = records
             break
-    result["dkim"]["raw"] = dkim_records
-    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
-        result["dkim"]["status"] = True
-        result["score"] += 3
+    if dkim_records:
+        result["dkim"]["raw"] = dkim_records
+        if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
+            result["dkim"]["status"] = True
+            result["score"] += 3
+    else:
+        result["dkim"]["raw"] = ["DKIM selectors not found"]
 
     # DMARC prüfen
     dmarc_records = check_dns_record(f"_dmarc.{domain}")
@@ -80,7 +83,9 @@ def render_email_security(email_security):
 
     # DKIM
     dkim_records = email_security.get("dkim", {}).get("raw", [])
-    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
+    if "DKIM selectors not found" in dkim_records:
+        dkim_line = "❌ [red]DKIM fehlt – keine Selector gefunden[/red]"
+    elif any("v=DKIM1" in r and "p=" in r for r in dkim_records):
         dkim_line = "✅ DKIM vorhanden"
     else:
         dkim_line = "❌ [red]DKIM fehlt oder falsch konfiguriert[/red]"
