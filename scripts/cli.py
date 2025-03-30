@@ -33,19 +33,21 @@ def main():
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
     console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}")
+    console.print()
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
     console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
     console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
-
     if plugins:
         console.print("[bold]Plugins:[/bold]")
         for plugin in plugins:
             console.print(f"  • {plugin}")
+        console.print()
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt")
+        console.print()
 
     # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
@@ -63,6 +65,7 @@ def main():
 
         for tracker in detected_trackers:
             console.print(f"  • {tracker}")
+            console.print()
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
@@ -84,6 +87,7 @@ def main():
         console.print(f"🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
     else:
         console.print(f"🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
+    console.print()
 
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
@@ -102,11 +106,11 @@ def main():
         console.print("[red]❌ Kein Cookie-Banner erkannt[/red]")
 
     console.print(f"[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
-    
     console.print(f"[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
 
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
+    console.print()
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
@@ -117,6 +121,7 @@ def main():
     console.print(spf_status)
     console.print(dkim_status)
     console.print(dmarc_status)
+    console.print()
 
     overall_score = sum([1 for status in [spf_status, dkim_status, dmarc_status] if "✅" in status])
 
@@ -129,6 +134,7 @@ def main():
 
     console.print(f"🔐 Gesamtbewertung: [bold]{overall_score}/3 – {rating_text[overall_score]}[/bold]")
     console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
+    console.print()
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
