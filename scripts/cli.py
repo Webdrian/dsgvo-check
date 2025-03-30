@@ -108,12 +108,6 @@ def main():
             console.print(f"  • {s}")
 
     console.print(f"\n[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
-    known_tools = tools_detected
-
-    if known_tools:
-        console.print("🔍 Verwendete Tools:")
-        for tool in known_tools:
-            console.print(f"  • {tool}")
 
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
