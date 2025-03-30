@@ -40,7 +40,13 @@ def main():
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt")
 
-    console.rule("[bold magenta]3. DSGVO-Check[/bold magenta]")
+    console.rule("[bold magenta]3. Tracker[/bold magenta]")
+    if network_requests:
+        console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
+        for request in network_requests:
+            console.print(f"  {request}")
+
+    console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
     if total_issues == 0:
         console.print("\n🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
@@ -64,7 +70,7 @@ def main():
     if not any([risks, violations, indicators]):
         console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
 
-    console.rule("[bold yellow]4. Cookies[/bold yellow]")
+    console.rule("[bold yellow]5. Cookies[/bold yellow]")
     if cookie_tool:
         console.print(f"[bold]Erkanntes Cookie-Tool:[/bold] {cookie_tool}")
     if cookie_banner:
@@ -82,7 +88,7 @@ def main():
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
 
-    console.rule("[bold blue]5. E-Mail-Sicherheit[/bold blue]")
+    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     for prot, records in email_security.items():
         if any("v=" in r for r in records):
             console.print(f"✅ {prot} vorhanden")
@@ -100,7 +106,7 @@ def main():
     else:
         console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
 
-    console.rule("[bold white]6. SSL-Zertifikat[/bold white]")
+    console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
     if ssl_info and "error" not in ssl_info:
         console.print(f"Issuer: {ssl_info['issuer']}")
         console.print(f"Common Name: {ssl_info['common_name']}")
