@@ -48,12 +48,18 @@ def main():
     with open('scripts/json/trackers.json', 'r', encoding='utf-8') as f:
         trackers = json.load(f)
 
+    detected_trackers = set()  # Verwende ein Set, um Duplikate zu vermeiden
+
     if network_requests:
         console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
-        for tracker in trackers:  # 'trackers' ist die Liste von Tracker-Daten aus deiner 'trackers.json'
+        for tracker in trackers:
             for match in tracker["match"]:
                 if any(match.lower() in request.lower() for request in network_requests):
-                    console.print(f"  • {tracker['name']}")
+                    detected_trackers.add(tracker['name'])
+
+        # Ausgabe der Tracker ohne Duplikate
+        for tracker in detected_trackers:
+            console.print(f"  • {tracker}")
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
