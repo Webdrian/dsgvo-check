@@ -83,6 +83,9 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
+    # Füge eine Leerzeile nach der DSGVO-Ampel ein
+    console.print("\n")
+
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
         for i in indicators:
