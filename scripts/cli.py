@@ -28,14 +28,20 @@ def main():
     raw_email_security = check_email_security(domain)
     if isinstance(raw_email_security, list):
         raw_email_security = raw_email_security[0] if raw_email_security else {}
-    
-    raw_spf = raw_email_security.get("spf", [])
-    raw_dkim = raw_email_security.get("dkim", [])
-    raw_dmarc = raw_email_security.get("dmarc", [])
 
-    spf = raw_spf[0] if isinstance(raw_spf, list) and raw_spf else {"status": False, "score": 0}
-    dkim = raw_dkim[0] if isinstance(raw_dkim, list) and raw_dkim else {"status": False, "score": 0}
-    dmarc = raw_dmarc[0] if isinstance(raw_dmarc, list) and raw_dmarc else {"status": False, "score": 0, "policy": "Keine Policy gefunden"}
+    def extract_record(data, default):
+        if isinstance(data, list) and data:
+            if isinstance(data[0], dict):
+                return data[0]
+            return default
+        elif isinstance(data, dict):
+            return data
+        else:
+            return default
+
+    spf = extract_record(raw_email_security.get("spf"), {"status": False, "score": 0})
+    dkim = extract_record(raw_email_security.get("dkim"), {"status": False, "score": 0})
+    dmarc = extract_record(raw_email_security.get("dmarc"), {"status": False, "score": 0, "policy": "Keine Policy gefunden"})
 
     email_security = {
         "spf": spf,
