@@ -79,10 +79,9 @@ def render_email_security(email_security):
 
     # DKIM
     dkim_records = email_security.get("dkim", {}).get("raw", [])
-    if any("v=DKIM1" in r for r in dkim_records):
-        dkim_line = "✅ DKIM vorhanden"
-        if any("p=" in r for r in dkim_records):
-            pass
+    if any("v=DKIM1" in r for r in dkim_records) or any("p=" in r for r in dkim_records):
+        if all("p=" in r for r in dkim_records if "v=DKIM1" in r or True):
+            dkim_line = "✅ DKIM vorhanden"
         else:
             dkim_line = "⚠️ [orange3]DKIM vorhanden, aber kein 'p=' Schlüssel gefunden[/orange3]"
     else:
