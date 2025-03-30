@@ -64,6 +64,18 @@ def main():
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
+
+    # Mehr Abstand und korrekte Reihenfolge
+    if risks:
+        console.print("\n[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
+        for r in risks:
+            console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
+
+    if violations:
+        console.print("\n[red]🚨 Vor Einwilligung geladen:[/red]")
+        for v in violations:
+            console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
+
     if total_issues == 0:
         console.print("\n🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
     elif total_issues <= 2:
@@ -71,14 +83,6 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
-    if risks:
-        console.print("[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
-        for r in risks:
-            console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
-    if violations:
-        console.print("[red]🚨 Vor Einwilligung geladen:[/red]")
-        for v in violations:
-            console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
         for i in indicators:
