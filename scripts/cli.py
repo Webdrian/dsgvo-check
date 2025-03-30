@@ -123,37 +123,26 @@ def main():
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
     email_security = {
-        "spf": email_security.get("spf", {"status": False}),
-        "dkim": email_security.get("dkim", {"status": False}),
-        "dmarc": email_security.get("dmarc", {"status": False, "policy": "Keine Policy gefunden"}),
+        "spf": email_security.get("spf", {"status": False, "score": 0}),
+        "dkim": email_security.get("dkim", {"status": False, "score": 0}),
+        "dmarc": email_security.get("dmarc", {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
         "score": email_security.get("score", 0),
         "rating": email_security.get("rating", "Keine Bewertung verfügbar"),
     }
 
-    if "spf" in email_security:
-        spf_status = email_security["spf"].get("status", False)
-        console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
-    else:
-        console.print("❌ SPF fehlt")
+    spf_status = email_security["spf"]["status"]
+    dkim_status = email_security["dkim"]["status"]
+    dmarc_status = email_security["dmarc"]["status"]
+    dmarc_policy = email_security["dmarc"].get("policy", "Keine Policy gefunden")
 
-    if "dkim" in email_security:
-        dkim_status = email_security["dkim"].get("status", False)
-        console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
-    else:
-        console.print("❌ DKIM fehlt oder falsch konfiguriert")
-
-    if "dmarc" in email_security:
-        dmarc_status = email_security["dmarc"].get("status", False)
-        dmarc_policy = email_security["dmarc"].get("policy", "Keine Policy gefunden")
-        console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
-    else:
-        console.print("❌ DMARC fehlt oder falsch konfiguriert")
-
+    console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
+    console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
+    console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
     console.print()
 
     score = email_security.get("score", 0)
     rating = email_security.get("rating", "Keine Bewertung verfügbar")
-    console.print(f"🔐 Gesamtbewertung: [bold]{score}/10 – {rating}[/bold]")
+    console.print(f"🔐 Gesamtbewertung: [bold blue]{score}/10[/bold blue] – [bold]{rating}[/bold]")
     console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
     console.print()
 

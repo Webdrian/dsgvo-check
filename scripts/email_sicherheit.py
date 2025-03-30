@@ -17,43 +17,57 @@ def check_email_security(domain):
 def render_email_security(email_security):
     lines = []
     lines.append("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
+    lines.append("")
 
-    # Erweiterter Score: 0–10
     score = 0
 
-    # SPF Check
+    # SPF
     spf_records = email_security.get("SPF", [])
     if any("v=spf1" in r for r in spf_records):
-        score += 1
-        if any("+all" not in r and "~all" in r for r in spf_records):
-            score += 2
+        spf_line = "✅ SPF vorhanden"
+        score += 2
+        if any("-all" in r for r in spf_records):
+            score += 1
+        elif any("~all" in r for r in spf_records):
+            spf_line += " (nur ~all)"
+            score += 0.5
         else:
-            lines.append("⚠️ [orange3]SPF vorhanden, aber keine empfohlene Policy (~all)[/orange3]")
+            spf_line = "⚠️ [orange3]SPF vorhanden, aber keine gültige Policy (~all oder -all)[/orange3]"
     else:
-        lines.append("❌ [red]SPF fehlt oder falsch konfiguriert[/red]")
+        spf_line = "❌ [red]SPF fehlt oder falsch konfiguriert[/red]"
+    lines.append(spf_line)
 
-    # DKIM Check
+    # DKIM
     dkim_records = email_security.get("DKIM", [])
     if any("v=DKIM1" in r for r in dkim_records):
-        score += 1
-        if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
-            score += 2
+        dkim_line = "✅ DKIM vorhanden"
+        score += 2
+        if any("p=" in r for r in dkim_records):
+            score += 1
         else:
-            lines.append("⚠️ [orange3]DKIM vorhanden, aber kein 'p=' Schlüssel gefunden[/orange3]")
+            dkim_line = "⚠️ [orange3]DKIM vorhanden, aber kein 'p=' Schlüssel gefunden[/orange3]"
     else:
-        lines.append("❌ [red]DKIM fehlt oder falsch konfiguriert[/red]")
+        dkim_line = "❌ [red]DKIM fehlt oder falsch konfiguriert[/red]"
+    lines.append(dkim_line)
 
-    # DMARC Check
+    # DMARC
     dmarc_records = email_security.get("DMARC", [])
     if any("v=DMARC1" in r for r in dmarc_records):
-        score += 1
-        if any("p=reject" in r or "p=quarantine" in r for r in dmarc_records):
-            score += 2
+        dmarc_line = "✅ DMARC vorhanden"
+        score += 2
+        if any("p=reject" in r for r in dmarc_records):
+            score += 1
+        elif any("p=quarantine" in r for r in dmarc_records):
+            score += 0.5
         else:
-            lines.append("⚠️ [orange3]DMARC vorhanden, aber keine starke Policy (reject/quarantine)[/orange3]")
+            dmarc_line = "⚠️ [orange3]DMARC vorhanden, aber keine starke Policy (reject/quarantine)[/orange3]"
     else:
-        lines.append("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
+        dmarc_line = "❌ [red]DMARC fehlt oder falsch konfiguriert[/red]"
+    lines.append(dmarc_line)
 
+    lines.append("")
+
+    # Bewertung
     if score >= 9:
         level = "[green]Sehr gut geschützt[/green]"
     elif score >= 6:
