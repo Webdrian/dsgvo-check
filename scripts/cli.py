@@ -7,6 +7,7 @@ from dsgvo import evaluate_risks
 
 from urllib.parse import urlparse
 from rich.console import Console
+import json
 
 def main():
     console = Console()
@@ -44,6 +45,9 @@ def main():
 
     # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
+    with open('scripts/json/trackers.json', 'r', encoding='utf-8') as f:
+        trackers = json.load(f)
+
     if network_requests:
         console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
         for tracker in trackers:  # 'trackers' ist die Liste von Tracker-Daten aus deiner 'trackers.json'
