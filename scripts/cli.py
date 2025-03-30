@@ -29,13 +29,13 @@ def main():
     console.rule("[bold green]1. Allgemeine Informationen[/bold green]")
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
-    console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}\n")
+    console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}")
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
     console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
-    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}\n")
+    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
 
     if plugins:
         console.print("[bold]Plugins:[/bold]")
@@ -82,8 +82,6 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
-    console.print("\n")
-
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
         for i in indicators:
@@ -108,8 +106,7 @@ def main():
     if cookies_after:
         console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
     if not cookies_before and not cookies_after:
-        console.print("Keine Cookies erkannt.\n")
-    console.print("\n")
+        console.print("Keine Cookies erkannt.")
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
@@ -120,8 +117,6 @@ def main():
         console.print("🟡 [bold yellow]E-Mail-Ampel: Teilweise geschützt[/bold yellow]")
     else:
         console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
-    
-    console.print("\n")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
@@ -132,8 +127,7 @@ def main():
         console.print(f"SHA-1: {ssl_info['sha1']}")
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
-        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]\n")
-    console.print("\n")
-
+        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+    
 if __name__ == "__main__":
     main()
