@@ -9,29 +9,28 @@ def check_dns_record(name):
 
 def check_email_security(domain):
     result = {}
-    result["SPF"] = check_dns_record(domain)
-    result["DMARC"] = check_dns_record(f"_dmarc.{domain}")
-    result["DKIM"] = check_dns_record(f"default._domainkey.{domain}")
+    result["spf"] = check_dns_record(domain)
+    result["dmarc"] = check_dns_record(f"_dmarc.{domain}")
+    result["dkim"] = check_dns_record(f"default._domainkey.{domain}")
     
-    # Scoreberechnung (kopiert aus render_email_security, um dort nicht doppelt zu zählen)
     score = 0
-    if any("v=spf1" in r for r in result["SPF"]):
+    if any("v=spf1" in r for r in result["spf"]):
         score += 2
-        if any("-all" in r for r in result["SPF"]):
+        if any("-all" in r for r in result["spf"]):
             score += 1
-        elif any("~all" in r for r in result["SPF"]):
+        elif any("~all" in r for r in result["spf"]):
             score += 0.5
 
-    if any("v=DKIM1" in r for r in result["DKIM"]):
+    if any("v=DKIM1" in r for r in result["dkim"]):
         score += 2
-        if any("p=" in r for r in result["DKIM"]):
+        if any("p=" in r for r in result["dkim"]):
             score += 1
 
-    if any("v=DMARC1" in r for r in result["DMARC"]):
+    if any("v=DMARC1" in r for r in result["dmarc"]):
         score += 2
-        if any("p=reject" in r for r in result["DMARC"]):
+        if any("p=reject" in r for r in result["dmarc"]):
             score += 1
-        elif any("p=quarantine" in r for r in result["DMARC"]):
+        elif any("p=quarantine" in r for r in result["dmarc"]):
             score += 0.5
 
     result["score"] = score
@@ -45,7 +44,7 @@ def render_email_security(email_security):
     score = email_security.get("score", 0)
 
     # SPF
-    spf_records = email_security.get("SPF", [])
+    spf_records = email_security.get("spf", [])
     if any("v=spf1" in r for r in spf_records):
         spf_line = "✅ SPF vorhanden"
         if any("-all" in r for r in spf_records):
@@ -59,7 +58,7 @@ def render_email_security(email_security):
     lines.append(spf_line)
 
     # DKIM
-    dkim_records = email_security.get("DKIM", [])
+    dkim_records = email_security.get("dkim", [])
     if any("v=DKIM1" in r for r in dkim_records):
         dkim_line = "✅ DKIM vorhanden"
         if any("p=" in r for r in dkim_records):
@@ -71,7 +70,7 @@ def render_email_security(email_security):
     lines.append(dkim_line)
 
     # DMARC
-    dmarc_records = email_security.get("DMARC", [])
+    dmarc_records = email_security.get("dmarc", [])
     if any("v=DMARC1" in r for r in dmarc_records):
         dmarc_line = "✅ DMARC vorhanden"
         if any("p=reject" in r for r in dmarc_records):
