@@ -27,12 +27,17 @@ def check_email_security(domain):
             result["score"] += 0.5
 
     # DKIM prüfen (Selector "default")
-    dkim_records = check_dns_record(f"default._domainkey.{domain}")
+    dkim_selectors = ["default", "mail", "selector1", "email", "google"]
+    dkim_records = []
+    for selector in dkim_selectors:
+        records = check_dns_record(f"{selector}._domainkey.{domain}")
+        if any("v=DKIM1" in r for r in records):
+            dkim_records = records
+            break
     result["dkim"]["raw"] = dkim_records
-    if any("v=DKIM1" in r for r in dkim_records):
-        if any("p=" in r for r in dkim_records):
-            result["dkim"]["status"] = True
-            result["score"] += 3
+    if any("v=DKIM1" in r for r in dkim_records) and any("p=" in r for r in dkim_records):
+        result["dkim"]["status"] = True
+        result["score"] += 3
 
     # DMARC prüfen
     dmarc_records = check_dns_record(f"_dmarc.{domain}")
