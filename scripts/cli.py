@@ -61,6 +61,7 @@ def main():
         # Ausgabe der Tracker ohne Duplikate
         for tracker in detected_trackers:
             console.print(f"  • {tracker}")
+
     console.print("\n")  # Fügt unten einen Abstand hinzu
 
     # Abschnitt: DSGVO-Check
@@ -85,7 +86,7 @@ def main():
     else:
         console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
-    # Füge eine Leerzeile nach der DSGVO-Ampel ein
+    # Füge eine einzige Leerzeile nach der DSGVO-Ampel ein
     console.print("\n")
 
     if indicators:
