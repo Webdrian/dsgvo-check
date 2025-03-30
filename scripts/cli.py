@@ -44,7 +44,11 @@ def main():
     if network_requests:
         console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
         for request in network_requests:
-            console.print(f"  {request}")
+            # Extrahiere nur die Domain der URL
+            domain = urlparse(request).hostname
+            # Optional: Beschränke die URL auf wichtige Parameter
+            clean_url = f"{domain} - {urlparse(request).path}"
+            console.print(f"  {clean_url}")
 
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
