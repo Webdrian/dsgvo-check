@@ -8,32 +8,47 @@ def check_dns_record(name):
         return []
 
 def check_email_security(domain):
-    result = {}
-    result["spf"] = check_dns_record(domain)
-    result["dmarc"] = check_dns_record(f"_dmarc.{domain}")
-    result["dkim"] = check_dns_record(f"default._domainkey.{domain}")
-    
-    score = 0
-    if any("v=spf1" in r for r in result["spf"]):
-        score += 2
-        if any("-all" in r for r in result["spf"]):
-            score += 1
-        elif any("~all" in r for r in result["spf"]):
-            score += 0.5
+    result = {
+        "score": 0,
+        "spf": {"status": False, "raw": []},
+        "dkim": {"status": False, "raw": []},
+        "dmarc": {"status": False, "policy": "none", "raw": []},
+    }
 
-    if any("v=DKIM1" in r for r in result["dkim"]):
-        score += 2
-        if any("p=" in r for r in result["dkim"]):
-            score += 1
+    # SPF prüfen
+    spf_records = check_dns_record(domain)
+    result["spf"]["raw"] = spf_records
+    if any("v=spf1" in r for r in spf_records):
+        result["spf"]["status"] = True
+        result["score"] += 3
+        if any("-all" in r for r in spf_records):
+            result["score"] += 1
+        elif any("~all" in r for r in spf_records):
+            result["score"] += 0.5
 
-    if any("v=DMARC1" in r for r in result["dmarc"]):
-        score += 2
-        if any("p=reject" in r for r in result["dmarc"]):
-            score += 1
-        elif any("p=quarantine" in r for r in result["dmarc"]):
-            score += 0.5
+    # DKIM prüfen (Selector "default")
+    dkim_records = check_dns_record(f"default._domainkey.{domain}")
+    result["dkim"]["raw"] = dkim_records
+    if any("v=DKIM1" in r for r in dkim_records):
+        if any("p=" in r for r in dkim_records):
+            result["dkim"]["status"] = True
+            result["score"] += 3
 
-    result["score"] = score
+    # DMARC prüfen
+    dmarc_records = check_dns_record(f"_dmarc.{domain}")
+    result["dmarc"]["raw"] = dmarc_records
+    if any("v=DMARC1" in r for r in dmarc_records):
+        result["dmarc"]["status"] = True
+        result["score"] += 3
+        if any("p=reject" in r for r in dmarc_records):
+            result["score"] += 1
+            result["dmarc"]["policy"] = "reject"
+        elif any("p=quarantine" in r for r in dmarc_records):
+            result["score"] += 0.5
+            result["dmarc"]["policy"] = "quarantine"
+        elif any("p=none" in r for r in dmarc_records):
+            result["dmarc"]["policy"] = "none"
+
     return result
 
 def render_email_security(email_security):
@@ -41,10 +56,10 @@ def render_email_security(email_security):
     lines.append("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     lines.append("")
 
-    score = email_security.get("score", 0)
+    score = int(email_security.get("score", 0))
 
     # SPF
-    spf_records = email_security.get("spf", [])
+    spf_records = email_security.get("spf", {}).get("raw", [])
     if any("v=spf1" in r for r in spf_records):
         spf_line = "✅ SPF vorhanden"
         if any("-all" in r for r in spf_records):
@@ -58,7 +73,7 @@ def render_email_security(email_security):
     lines.append(spf_line)
 
     # DKIM
-    dkim_records = email_security.get("dkim", [])
+    dkim_records = email_security.get("dkim", {}).get("raw", [])
     if any("v=DKIM1" in r for r in dkim_records):
         dkim_line = "✅ DKIM vorhanden"
         if any("p=" in r for r in dkim_records):
@@ -70,7 +85,7 @@ def render_email_security(email_security):
     lines.append(dkim_line)
 
     # DMARC
-    dmarc_records = email_security.get("dmarc", [])
+    dmarc_records = email_security.get("dmarc", {}).get("raw", [])
     if any("v=DMARC1" in r for r in dmarc_records):
         dmarc_line = "✅ DMARC vorhanden"
         if any("p=reject" in r for r in dmarc_records):
