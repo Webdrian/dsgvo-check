@@ -30,6 +30,7 @@ def main():
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
     console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}\n")
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
@@ -43,6 +44,7 @@ def main():
             console.print(f"  • {plugin}")
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt\n")
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: Tracker
     console.print("\n")  # Fügt oben einen Abstand hinzu
@@ -64,6 +66,7 @@ def main():
             console.print(f"  • {tracker}")
 
     console.print("\n")  # Fügt unten einen Abstand hinzu
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
@@ -97,6 +100,8 @@ def main():
     if not any([risks, violations, indicators]):
         console.print("[green]Keine DSGVO-Probleme erkannt.[/green]\n")
 
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
+
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
     if cookie_tool:
@@ -115,6 +120,7 @@ def main():
         console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.\n")
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
@@ -125,6 +131,8 @@ def main():
         console.print("🟡 [bold yellow]E-Mail-Ampel: Teilweise geschützt[/bold yellow]")
     else:
         console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
+    
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
@@ -136,6 +144,7 @@ def main():
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
         console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]\n")
+    console.print("\n")  # Füge eine Leerzeile nach diesem Abschnitt ein
 
 if __name__ == "__main__":
     main()
