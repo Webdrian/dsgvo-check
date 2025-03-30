@@ -112,23 +112,25 @@ def main():
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    
     spf_status = "✅ SPF vorhanden"
     dkim_status = "❌ DKIM fehlt oder falsch konfiguriert"
     dmarc_status = "✅ DMARC vorhanden"
-    
+
     console.print(spf_status)
     console.print(dkim_status)
     console.print(dmarc_status)
 
     overall_score = sum([1 for status in [spf_status, dkim_status, dmarc_status] if "✅" in status])
 
-    if overall_score == 3:
-        console.print("🔐 Gesamtbewertung: Sehr gut geschützt")
-    elif overall_score == 2:
-        console.print("🔐 Gesamtbewertung: Gut, aber Verbesserung möglich")
-    else:
-        console.print("🔐 Gesamtbewertung: Schwach abgesichert")
+    rating_text = {
+        3: "Sehr gut geschützt",
+        2: "Gut, aber Verbesserung möglich",
+        1: "Schwach abgesichert",
+        0: "Keine Schutzmaßnahmen erkannt"
+    }
+
+    console.print(f"🔐 Gesamtbewertung: [bold]{overall_score}/3 – {rating_text[overall_score]}[/bold]")
+    console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
