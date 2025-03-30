@@ -55,7 +55,7 @@ def main():
     detected_trackers = set()
 
     if network_requests:
-        console.print("\n[yellow]⚠️ Tracker erkannt:[/yellow]")
+        console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
         for tracker in trackers:
             for match in tracker["match"]:
                 if any(match.lower() in request.lower() for request in network_requests):
@@ -69,21 +69,21 @@ def main():
     total_issues = len(risks) + len(violations) + len(indicators)
 
     if risks:
-        console.print("\n[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
+        console.print("[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
         for r in risks:
             console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
 
     if violations:
-        console.print("\n[red]🚨 Vor Einwilligung geladen:[/red]")
+        console.print("[red]🚨 Vor Einwilligung geladen:[/red]")
         for v in violations:
             console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
 
     if total_issues == 0:
-        console.print("\n🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
+        console.print("🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
     elif total_issues <= 2:
-        console.print(f"\n🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
+        console.print(f"🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
     else:
-        console.print(f"\n🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
+        console.print(f"🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
 
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
@@ -101,13 +101,9 @@ def main():
     else:
         console.print("[red]❌ Kein Cookie-Banner erkannt[/red]")
 
-    console.print(f"\n[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
-    if suspicious:
-        console.print("🚨 [red]Auffällige Cookies vor Zustimmung:[/red]")
-        for s in suspicious:
-            console.print(f"  • {s}")
-
-    console.print(f"\n[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
+    console.print(f"[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
+    
+    console.print(f"[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
 
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
