@@ -44,6 +44,7 @@ def main():
         console.print("[bold]Plugins:[/bold] Keine erkannt")
 
     # Abschnitt: Tracker
+    console.print("\n")  # Fügt oben einen Abstand hinzu
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
     with open('scripts/json/trackers.json', 'r', encoding='utf-8') as f:
         trackers = json.load(f)
@@ -51,7 +52,7 @@ def main():
     detected_trackers = set()  # Verwende ein Set, um Duplikate zu vermeiden
 
     if network_requests:
-        console.print("[yellow]⚠️ Tracker erkannt:[/yellow]")
+        console.print("\n[yellow]⚠️ Tracker erkannt:[/yellow]")
         for tracker in trackers:
             for match in tracker["match"]:
                 if any(match.lower() in request.lower() for request in network_requests):
@@ -60,6 +61,8 @@ def main():
         # Ausgabe der Tracker ohne Duplikate
         for tracker in detected_trackers:
             console.print(f"  • {tracker}")
+
+    console.print("\n")  # Fügt unten einen Abstand hinzu
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
