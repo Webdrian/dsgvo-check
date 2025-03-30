@@ -16,7 +16,7 @@ def check_email_security(domain):
 
 def render_email_security(email_security):
     lines = []
-    lines.append("[bold blue]5. E-Mail-Sicherheit[/bold blue]")
+    lines.append("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
     # Erweiterter Score: 0–10
     score = 0
@@ -47,18 +47,14 @@ def render_email_security(email_security):
         lines.append("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
 
     if score >= 9:
-        level = "Sehr gut"
-        icon = "🟢"
+        level = "[green]Sehr gut geschützt[/green]"
     elif score >= 6:
-        level = "Gut"
-        icon = "🟡"
+        level = "[yellow]Gut, aber Verbesserung möglich[/yellow]"
     elif score >= 3:
-        level = "Schwach"
-        icon = "🟠"
+        level = "[orange3]Verbesserung dringend nötig[/orange3]"
     else:
-        level = "Kritisch"
-        icon = "🔴"
+        level = "[red]Kritisch – Sofort handeln[/red]"
 
-    lines.append(f"{icon} [bold]Gesamtbewertung: {score}/10 – {level}[/bold]")
+    lines.append(f"🔐 [yellow]Gesamtbewertung: {score}/10 – {level}[/yellow]")
     lines.append("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
     return lines
