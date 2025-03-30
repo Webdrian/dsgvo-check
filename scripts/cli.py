@@ -29,19 +29,20 @@ def main():
     console.rule("[bold green]1. Allgemeine Informationen[/bold green]")
     console.print(f"[bold]URL:[/bold] {url}")
     console.print(f"[bold]Titel:[/bold] {title}")
-    console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}")
+    console.print(f"[bold]Beschreibung:[/bold] {desc or 'Keine Beschreibung gefunden'}\n")
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
     console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
-    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
+    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}\n")
+
     if plugins:
         console.print("[bold]Plugins:[/bold]")
         for plugin in plugins:
             console.print(f"  • {plugin}")
     else:
-        console.print("[bold]Plugins:[/bold] Keine erkannt")
+        console.print("[bold]Plugins:[/bold] Keine erkannt\n")
 
     # Abschnitt: Tracker
     console.print("\n")  # Fügt oben einen Abstand hinzu
@@ -94,7 +95,7 @@ def main():
         for i in indicators:
             console.print(f"  ❌ {i}")
     if not any([risks, violations, indicators]):
-        console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
+        console.print("[green]Keine DSGVO-Probleme erkannt.[/green]\n")
 
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
@@ -113,7 +114,7 @@ def main():
     if cookies_after:
         console.print(f"[bold]Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
     if not cookies_before and not cookies_after:
-        console.print("Keine Cookies erkannt.")
+        console.print("Keine Cookies erkannt.\n")
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
@@ -134,7 +135,7 @@ def main():
         console.print(f"SHA-1: {ssl_info['sha1']}")
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
-        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]\n")
 
 if __name__ == "__main__":
     main()
