@@ -45,7 +45,6 @@ def main():
         console.print("[bold]Plugins:[/bold] Keine erkannt\n")
 
     # Abschnitt: Tracker
-    console.print("\n")
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
     with open('scripts/json/trackers.json', 'r', encoding='utf-8') as f:
         trackers = json.load(f)
