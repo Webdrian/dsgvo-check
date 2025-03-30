@@ -35,7 +35,7 @@ def check_email_security(domain):
             dkim_records = records
             break
     result["dkim"]["raw"] = dkim_records
-    if any("v=DKIM1" in r for r in dkim_records) and any("p=" in r for r in dkim_records):
+    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
         result["dkim"]["status"] = True
         result["score"] += 3
 
@@ -53,6 +53,8 @@ def check_email_security(domain):
             result["dmarc"]["policy"] = "quarantine"
         elif any("p=none" in r for r in dmarc_records):
             result["dmarc"]["policy"] = "none"
+    else:
+        result["score"] -= 1  # slight penalty for missing strong policy
 
     return result
 
@@ -79,11 +81,8 @@ def render_email_security(email_security):
 
     # DKIM
     dkim_records = email_security.get("dkim", {}).get("raw", [])
-    if any("v=DKIM1" in r for r in dkim_records) or any("p=" in r for r in dkim_records):
-        if all("p=" in r for r in dkim_records if "v=DKIM1" in r or True):
-            dkim_line = "✅ DKIM vorhanden"
-        else:
-            dkim_line = "⚠️ [orange3]DKIM vorhanden, aber kein 'p=' Schlüssel gefunden[/orange3]"
+    if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
+        dkim_line = "✅ DKIM vorhanden"
     else:
         dkim_line = "❌ [red]DKIM fehlt oder falsch konfiguriert[/red]"
     lines.append(dkim_line)
