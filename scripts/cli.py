@@ -25,7 +25,7 @@ def main():
     ssl_info = get_ssl_info(domain)
     cookies_before, cookies_after, suspicious, tools_detected = analyze_cookies(url)
     cookie_db = load_cookie_db()
-    email_security = check_email_security(domain)
+    raw_email_security = check_email_security(domain)
     risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
     # Abschnitt: Allgemeine Informationen
@@ -123,11 +123,11 @@ def main():
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
     email_security = {
-        "spf": email_security.get("spf", {"status": False, "score": 0}),
-        "dkim": email_security.get("dkim", {"status": False, "score": 0}),
-        "dmarc": email_security.get("dmarc", {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
-        "score": email_security.get("score", 0),
-        "rating": email_security.get("rating", "Keine Bewertung verfügbar"),
+        "spf": raw_email_security.get("spf", {"status": False, "score": 0}),
+        "dkim": raw_email_security.get("dkim", {"status": False, "score": 0}),
+        "dmarc": raw_email_security.get("dmarc", {"status": False, "score": 0, "policy": "Keine Policy gefunden"}),
+        "score": raw_email_security.get("score", 0),
+        "rating": raw_email_security.get("rating", "Keine Bewertung verfügbar"),
     }
 
     spf_status = email_security["spf"]["status"]
