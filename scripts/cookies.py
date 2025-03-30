@@ -12,7 +12,7 @@ def analyze_cookies(url):
     cookie_db = {}
 
     try:
-        with open("scripts/cookies.json", "r", encoding="utf-8") as f:
+        with open("scripts/json/cookies.json", "r", encoding="utf-8") as f:
             cookie_db = json.load(f)
     except Exception as e:
         console.print(f"[bold red]Fehler beim Laden von cookies.json:[/bold red] {e}")
@@ -61,3 +61,11 @@ def analyze_cookies(url):
             suspicious.append(c.get("name", ""))
 
     return cookies_before, cookies_after, suspicious
+
+def load_cookie_db():
+    try:
+        with open("scripts/json/cookies.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[red]Fehler beim Laden von cookies.json:[/red] {e}")
+        return []
