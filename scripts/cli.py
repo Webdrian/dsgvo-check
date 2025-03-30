@@ -76,16 +76,20 @@ def main():
         for r in risks:
             console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
 
+    console.print()
     if violations:
         console.print("[red]🚨 Vor Einwilligung geladen:[/red]")
         for v in violations:
             console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
 
     if total_issues == 0:
+        console.print()
         console.print("🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
     elif total_issues <= 2:
+        console.print()
         console.print(f"🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
     else:
+        console.print()
         console.print(f"🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
     console.print()
 
