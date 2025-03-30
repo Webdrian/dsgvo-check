@@ -108,15 +108,23 @@ def main():
     if not cookies_before and not cookies_after:
         console.print("Keine Cookies erkannt.")
 
-    # Abschnitt: E-Mail-Sicherheit
-    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
-    if score == 3:
-        console.print("🟢 [bold green]E-Mail-Ampel: Sehr gut geschützt[/bold green]")
-    elif score == 2:
-        console.print("🟡 [bold yellow]E-Mail-Ampel: Teilweise geschützt[/bold yellow]")
+# Abschnitt: E-Mail-Sicherheit
+console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
+score = sum(1 for prot, records in email_security.items() if any("v=" in r for r in records))
+
+if score == 3:
+    console.print("🔐 [bold green]Gesamtbewertung: Sehr gut geschützt[/bold green]")
+elif score == 2:
+    console.print("🔐 [bold yellow]Gesamtbewertung: Gut, aber Verbesserung möglich[/bold yellow]")
+else:
+    console.print("🔐 [bold red]Gesamtbewertung: Schwach abgesichert[/bold red]")
+
+# Anzeige der einzelnen Ergebnisse für SPF, DMARC und DKIM
+for key, value in email_security.items():
+    if value:
+        console.print(f"[bold] {key}: [/bold] {', '.join(value)}")
     else:
-        console.print("🔴 [bold red]E-Mail-Ampel: Schwach oder ohne Schutz[/bold red]")
+        console.print(f"[bold]{key} fehlt oder ist fehlerhaft[/bold]")
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
