@@ -122,6 +122,14 @@ def main():
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
+    email_security = {
+        "spf": email_security.get("spf", {"status": False}),
+        "dkim": email_security.get("dkim", {"status": False}),
+        "dmarc": email_security.get("dmarc", {"status": False, "policy": "Keine Policy gefunden"}),
+        "score": email_security.get("score", 0),
+        "rating": email_security.get("rating", "Keine Bewertung verfügbar"),
+    }
+
     if "spf" in email_security:
         spf_status = email_security["spf"].get("status", False)
         console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
