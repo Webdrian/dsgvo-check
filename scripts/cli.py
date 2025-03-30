@@ -13,7 +13,7 @@ def main():
     url = input("Gib eine URL ein (mit https://): ").strip()
     domain = urlparse(url).hostname
 
-    html, network_requests, pre_consent_requests = fetch_html_and_requests(url)
+    html, network_requests, pre_consent_requests, cookie_tool = fetch_html_and_requests(url)
     title, desc = extract_meta(html)
     cms_list, builder_list = detect_cms(html)
     theme = detect_wordpress_theme(html)
@@ -56,6 +56,8 @@ def main():
         console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
 
     console.rule("[bold yellow]4. Cookies[/bold yellow]")
+    if cookie_tool:
+        console.print(f"[bold]Erkanntes Cookie-Tool:[/bold] {cookie_tool}")
     if cookies_before:
         console.print(f"[bold]Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
     if suspicious:
