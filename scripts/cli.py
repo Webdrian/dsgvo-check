@@ -61,8 +61,6 @@ def main():
         for tracker in detected_trackers:
             console.print(f"  • {tracker}")
 
-    console.print("\n")
-
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
     total_issues = len(risks) + len(violations) + len(indicators)
