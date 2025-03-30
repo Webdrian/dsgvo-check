@@ -1,7 +1,4 @@
 import dns.resolver
-from rich.console import Console
-
-console = Console()
 
 def check_dns_record(name):
     try:
@@ -17,28 +14,24 @@ def check_email_security(domain):
     result["DKIM"] = check_dns_record(f"default._domainkey.{domain}")
     return result
 
-def evaluate_email_security(email_security):
-    spf_records = email_security.get("SPF", [])
-    dmarc_records = email_security.get("DMARC", [])
-    dkim_records = email_security.get("DKIM", [])
+def render_email_security(email_security):
+    lines = []
+    lines.append("[bold blue]5. E-Mail-Sicherheit[/bold blue]")
 
-    console.print()
-    console.rule("[bold blue]5. E-Mail-Sicherheit[/bold blue]")
-
-    if any("v=" in r for r in spf_records):
-        console.print("✅ [green]SPF vorhanden[/green]")
+    if any("v=" in r for r in email_security.get("SPF", [])):
+        lines.append("✅ [green]SPF vorhanden[/green]")
     else:
-        console.print("❌ [red]SPF fehlt oder falsch konfiguriert[/red]")
+        lines.append("❌ [red]SPF fehlt oder falsch konfiguriert[/red]")
 
-    if any("v=" in r for r in dkim_records):
-        console.print("✅ [green]DKIM vorhanden[/green]")
+    if any("v=" in r for r in email_security.get("DKIM", [])):
+        lines.append("✅ [green]DKIM vorhanden[/green]")
     else:
-        console.print("❌ [red]DKIM fehlt oder falsch konfiguriert[/red]")
+        lines.append("❌ [red]DKIM fehlt oder falsch konfiguriert[/red]")
 
-    if any("v=" in r for r in dmarc_records):
-        console.print("✅ [green]DMARC vorhanden[/green]")
+    if any("v=" in r for r in email_security.get("DMARC", [])):
+        lines.append("✅ [green]DMARC vorhanden[/green]")
     else:
-        console.print("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
+        lines.append("❌ [red]DMARC fehlt oder falsch konfiguriert[/red]")
 
     score = sum(1 for key in ["SPF", "DKIM", "DMARC"] if any("v=" in r for r in email_security.get(key, [])))
 
@@ -49,7 +42,6 @@ def evaluate_email_security(email_security):
         0: "Keine Schutzmaßnahmen erkannt"
     }
 
-    console.print()
-    console.print(f"🛡️ [yellow]Gesamtbewertung: {score}/3 – {rating_text[score]}[/yellow]")
-    console.print("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
-    return score, rating_text[score]
+    lines.append(f"🛡️ [yellow]Gesamtbewertung: {score}/3 – {rating_text[score]}[/yellow]")
+    lines.append("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
+    return lines
