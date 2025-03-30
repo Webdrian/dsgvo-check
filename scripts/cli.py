@@ -1,7 +1,7 @@
 from fetching import fetch_html_and_requests, extract_meta
 from cms import detect_cms, detect_wordpress_theme, detect_plugins
 from ssl_info import get_ssl_info
-from cookies import analyze_cookies
+from cookies import analyze_cookies, load_cookie_db
 from email_sicherheit import check_email_security
 from dsgvo import evaluate_risks
 
@@ -20,8 +20,9 @@ def main():
     plugins = detect_plugins(html)
     ssl_info = get_ssl_info(domain)
     cookies_before, cookies_after, suspicious = analyze_cookies(url)
+    load_cookie_db("scripts/json/cookies.json")
     email_security = check_email_security(domain)
-    risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests)
+    risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
 
     console.rule("[bold green]1. Allgemeine Informationen[/bold green]")
     console.print(f"[bold]URL:[/bold] {url}")
