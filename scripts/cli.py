@@ -122,15 +122,25 @@ def main():
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
-    spf_status = email_security.get("spf", {}).get("status", False)
-    dkim_status = email_security.get("dkim", {}).get("status", False)
-    dmarc_data = email_security.get("dmarc", {})
-    dmarc_status = dmarc_data.get("status", False)
-    dmarc_policy = dmarc_data.get("policy", "Keine Policy gefunden")
+    if "spf" in email_security:
+        spf_status = email_security["spf"].get("status", False)
+        console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
+    else:
+        console.print("❌ SPF fehlt")
 
-    console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
-    console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
-    console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
+    if "dkim" in email_security:
+        dkim_status = email_security["dkim"].get("status", False)
+        console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
+    else:
+        console.print("❌ DKIM fehlt oder falsch konfiguriert")
+
+    if "dmarc" in email_security:
+        dmarc_status = email_security["dmarc"].get("status", False)
+        dmarc_policy = email_security["dmarc"].get("policy", "Keine Policy gefunden")
+        console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
+    else:
+        console.print("❌ DMARC fehlt oder falsch konfiguriert")
+
     console.print()
 
     score = email_security.get("score", 0)
