@@ -26,13 +26,11 @@ def check_dns_record(name, record_type='TXT'):
     return results
 
 def check_email_security(domain):
-    debug_log = []
     result = {
         "score": 0,
         "spf": {"status": False, "raw": [], "policy": "none"},
         "dkim": {"status": False, "raw": [], "selector": None, "key_size": 0},
         "dmarc": {"status": False, "policy": "none", "raw": [], "pct": 0},
-        "debug": debug_log
     }
 
     # SPF mit erweiterter Prüfung
@@ -63,19 +61,15 @@ def check_email_security(domain):
             # Sehr flexible SPF-Erkennung
             if "v=spf1" in record_lower:
                 result["spf"]["status"] = True
-                debug_log.append("SPF gefunden → +2")
                 result["score"] += 2  # SPF vorhanden
                 if "-all" in record_lower:
                     result["score"] += 2
-                    debug_log.append("SPF Policy: -all → +2")
                     result["spf"]["policy"] = "strict"
                 elif "~all" in record_lower:
                     result["score"] += 0.5
-                    debug_log.append("SPF Policy: ~all → +0.5")
                     result["spf"]["policy"] = "softfail"
                 elif "+all" in record_lower:
                     result["score"] -= 1
-                    debug_log.append("SPF Policy: +all → -1")
                     result["spf"]["policy"] = "dangerous"
                 else:
                     result["spf"]["policy"] = "weak"
@@ -87,53 +81,81 @@ def check_email_security(domain):
         print(f"SPF check error: {str(e)}")
         result["spf"]["raw"].append(f"Error: {str(e)}")
 
-    # DKIM prüfen (vereinfachte und stabilere Variante)
+    # DKIM prüfen (stark erweiterte Selector-Liste)
     dkim_selectors = [
-        "default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "k",
+        "default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "k", 
         "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", "20240101", "20230101",
         "key", "mx", "mailchimp", "mandrill", "smtp", "dk", "dkim1", "dkim2", "current",
-        "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z", "x",
+        "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z", "x", 
         "ses", "sendinblue", "outlook", "m1", "m2", "c1", "c2", "pm", "sendgrid",
         "prod", "test", "demo", "primary", "secondary", "main", "alt", "new", "old"
     ]
-
+    
+    dkim_records = []
     found_selector = None
+    
+    # Versuche erweiterte DKIM-Prüfung
     for selector in dkim_selectors:
         try:
             records = check_dns_record(f"{selector}._domainkey.{domain}")
-            for record in records:
-                if "v=dkim1" in record.lower() and "p=" in record:
-                    try:
-                        p_value = record.split("p=", 1)[1].split(";")[0].strip().replace(" ", "")
-                        key_size = len(p_value) * 6 // 8  # grobe Umrechnung
-                        result["dkim"]["key_size"] = key_size
-                        result["dkim"]["selector"] = selector
-                        result["dkim"]["raw"] = records
-
-                        if key_size >= 384:
-                            result["dkim"]["status"] = True
-                            debug_log.append(f"DKIM gültig mit {key_size} Bit (Selector: {selector}) → +3")
-                            result["score"] += 3
-                            if key_size >= 1024:
-                                result["score"] += 1
-                                debug_log.append("DKIM Key ≥ 1024 → +1")
-                        else:
-                            result["dkim"]["status"] = False
-                            debug_log.append(f"DKIM Key zu schwach mit {key_size} Bit → -1")
-                            result["score"] -= 1
-                        found_selector = selector
+            if records:
+                # Zusätzliche Validierung, dass es ein echter DKIM-Eintrag ist
+                valid_dkim = False
+                for record in records:
+                    if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
+                        valid_dkim = True
                         break
+                
+                if valid_dkim:
+                    dkim_records = records
+                    found_selector = selector
+                    # Debug-Ausgabe entfernt: print(f"✅ DKIM selector found: {found_selector}")
+                    break
+        except Exception:
+            continue
+            
+    if dkim_records:
+        result["dkim"]["raw"] = dkim_records
+        result["dkim"]["selector"] = found_selector
+        
+        # DKIM-Status auch ohne genaue Schlüsselgrößenprüfung akzeptieren
+        has_valid_dkim = False
+        
+        for record in dkim_records:
+            record_lower = record.lower()
+            if "v=dkim1" in record_lower or "k=rsa" in record_lower:
+                has_valid_dkim = True
+                result["dkim"]["status"] = True
+                result["score"] += 3  # Grundpunkte für DKIM
+                
+                # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
+                if "p=" in record:
+                    try:
+                        p_value = ""
+                        if ";" in record.split("p=")[1]:
+                            p_value = record.split("p=")[1].split(";")[0].strip('"\'')
+                        else:
+                            p_value = record.split("p=")[1].strip('"\'')
+                            
+                        # Behandle mehrere Teile (manchmal werden lange Keys in Teilen gespeichert)
+                        p_value = p_value.replace(" ", "")
+                        key_size = len(p_value) * 6 / 8  # Grobe Umrechnung von Base64 zu Bits
+                        result["dkim"]["key_size"] = key_size
+                        
+                        if key_size >= 1024:  # Bonus für großen Schlüssel
+                            result["score"] += 1
                     except Exception as e:
-                        debug_log.append(f"Fehler bei DKIM-Analyse: {str(e)}")
-            if found_selector:
+                        print(f"DKIM key size error: {str(e)}")
                 break
-        except Exception as e:
-            debug_log.append(f"Fehler beim Abfragen von DKIM ({selector}): {str(e)}")
-
-    if not result["dkim"]["status"]:
+        
+        # Wenn kein gültiger DKIM-Eintrag, aber Records gefunden wurden
+        if not has_valid_dkim:
+            result["dkim"]["status"] = False  # Als nicht vorhanden markieren
+            result["score"] -= 1  # Abzug für ungültigen DKIM
+    else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
-        result["score"] -= 1
-        debug_log.append("❌ Kein gültiger DKIM-Record gefunden → -1")
+        result["score"] -= 1  # Abzug für fehlendes DKIM
+        # Debug-Ausgabe entfernt: print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
     try:
@@ -143,7 +165,6 @@ def check_email_security(domain):
         if any("v=DMARC1" in r for r in dmarc_records):
             result["dmarc"]["status"] = True
             result["score"] += 1  # DMARC vorhanden
-            debug_log.append("DMARC vorhanden → +1")
 
             # DMARC pct Wert extrahieren
             for r in dmarc_records:
@@ -157,15 +178,12 @@ def check_email_security(domain):
             if any("p=reject" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "reject"
                 result["score"] += 5 if result["dmarc"]["pct"] == 100 else 4
-                debug_log.append("DMARC Policy: reject → +5")
             elif any("p=quarantine" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "quarantine"
                 result["score"] += 2 if result["dmarc"]["pct"] == 100 else 1
-                debug_log.append("DMARC Policy: quarantine → +2")
             elif any("p=none" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "none"
                 result["score"] -= 1
-                debug_log.append("DMARC Policy: none → -1")
         else:
             result["score"] -= 1  # Kein DMARC
     except Exception as e:
@@ -181,19 +199,16 @@ def check_email_security(domain):
         result["dmarc"]["policy"] != "none" and 
         not result["dkim"]["status"]
     ):
-        debug_log.append("SPF + DMARC vorhanden, aber kein DKIM → set score = 4")
         result["score"] = max(result["score"], 4)
         result["score"] = min(result["score"], 4)
     
     # 3. Wenn SPF mit -all und DMARC=reject, mindestens 8 Punkte
     elif (result["spf"]["status"] and result["spf"]["policy"] == "strict" and 
           result["dmarc"]["status"] and result["dmarc"]["policy"] == "reject"):
-        debug_log.append("SPF strict + DMARC reject → min score = 8")
         result["score"] = max(8, result["score"])
     
     # 4. Wenn kein SPF oder kein DMARC, max 2 Punkte
     elif not result["spf"]["status"] or not result["dmarc"]["status"]:
-        debug_log.append("SPF oder DMARC fehlt → max score = 2")
         result["score"] = min(2, result["score"])
     
     # Maximale Punktzahl begrenzen und runden
@@ -201,7 +216,6 @@ def check_email_security(domain):
     
     # Wenn nur SPF vorhanden (DKIM & DMARC fehlen), vergib EasyDMARC-kompatibel mindestens 3 Punkte
     if result["spf"]["status"] and not result["dkim"]["status"] and not result["dmarc"]["status"]:
-        debug_log.append("Nur SPF vorhanden → score = 3")
         result["score"] = max(result["score"], 3)
         result["score"] = min(result["score"], 3)
     
