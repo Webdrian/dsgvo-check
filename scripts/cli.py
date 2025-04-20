@@ -155,17 +155,12 @@ def main():
         console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
 
     # DKIM Status
-    dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
-    dkim_selector = email_security["dkim"].get("selector", "nicht gefunden")
-    if dkim_status:
-        console.print(f"[green]✓[/green] DKIM vorhanden (Selector: {dkim_selector})")
-    else:
-        # Debug-Ausgabe hinzufügen
-        dkim_raw = email_security["dkim"].get("raw", [])
-        debug_info = ""
-        if dkim_raw and dkim_raw[0] != "DKIM selectors not found":
-            debug_info = f" (Problem mit Selector '{dkim_selector}')"
-        console.print(f"[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert{debug_info}[/red]")
+dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
+dkim_selector = email_security["dkim"].get("selector", "nicht gefunden")
+if dkim_status:
+    console.print(f"[green]✓[/green] DKIM vorhanden (Selector: {dkim_selector})")
+else:
+    console.print(f"[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
 
     # DMARC Status
     dmarc_status = str(email_security["dmarc"].get("status", "")).lower() in ["valid", "pass", "true"]

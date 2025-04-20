@@ -1,13 +1,6 @@
 import dns.resolver
 from rich.console import Console
 
-def check_dns_record(name):
-    try:
-        answers = dns.resolver.resolve(name, 'TXT')
-        return [r.to_text() for r in answers]
-    except:
-        return []
-
 def check_email_security(domain):
     result = {
         "score": 0,
@@ -28,7 +21,7 @@ def check_email_security(domain):
             result["score"] += 0.5
 
     # DKIM prüfen (erweiterte Selector-Liste)
-    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "2023", "2024", "s1", "s2", "selector2"]
+    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "2023", "2024", "s1", "s2", "selector2", "mta"]
     dkim_records = []
     found_selector = None
     
