@@ -219,14 +219,7 @@ def check_email_security(domain):
     except Exception as e:
         print(f"DMARC check error: {str(e)}")
         result["dmarc"]["raw"].append(f"Error: {str(e)}")
-    
-    # Spezifische domänenbasierte Anpassungen für bekannte Domains
-    domain_lower = domain.lower()
-    
-    if domain_lower == "ninofischlein.de":
-        # EasyDMARC zeigt 2/10 - anpassen
-        result["score"] = 2
-    
+        
     # Allgemeine Regelanpassungen
     
     # 2. Wenn nur SPF und DMARC vorhanden sind (kein DKIM), max 4 Punkte
