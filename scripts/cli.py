@@ -178,6 +178,13 @@ def main():
     rating = email_security.get("rating", "Keine Bewertung verfügbar")
 
     console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
+    # scoring_reason anzeigen (wenn vorhanden)
+    reasons = raw_email_security.get("scoring_reason", [])
+    if reasons:
+        console.print()
+        console.print("[bold]Begründung der Bewertung:[/bold]")
+        for r in reasons:
+            console.print(f"- {r}")
     console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
     console.print()
 
