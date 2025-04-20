@@ -144,8 +144,6 @@ def main():
         console.print("Keine Cookies erkannt.")
     console.print()
 
-  # Ersetze in der main() Funktion den Abschnitt "E-Mail-Sicherheit" mit diesem Code:
-
 # Abschnitt: E-Mail-Sicherheit
 console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
@@ -184,14 +182,11 @@ console.print()
 
 # Abschnitt: SSL-Zertifikat
 console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
-    if ssl_info and "error" not in ssl_info:
-        console.print(f"Issuer: {ssl_info['issuer']}")
-        console.print(f"Common Name: {ssl_info['common_name']}")
-        console.print(f"Gültig von: {ssl_info['valid_from']} bis {ssl_info['valid_to']}")
-        console.print(f"SHA-1: {ssl_info['sha1']}")
-        console.print(f"SHA-256: {ssl_info['sha256']}")
-    else:
-        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
-
-if __name__ == "__main__":
-    main()
+if ssl_info and "error" not in ssl_info:
+    console.print(f"Issuer: {ssl_info['issuer']}")
+    console.print(f"Common Name: {ssl_info['common_name']}")
+    console.print(f"Gültig von: {ssl_info['valid_from']} bis {ssl_info['valid_to']}")
+    console.print(f"SHA-1: {ssl_info['sha1']}")
+    console.print(f"SHA-256: {ssl_info['sha256']}")
+else:
+    console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
