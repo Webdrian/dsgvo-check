@@ -1,11 +1,35 @@
 import dns.resolver
+import time
 
-def check_dns_record(name):
-    try:
-        answers = dns.resolver.resolve(name, 'TXT')
-        return [r.to_text() for r in answers]
-    except:
-        return []
+def check_dns_record(name, record_type='TXT'):
+    results = []
+    # Mehrere DNS-Server verwenden
+    resolvers = [
+        dns.resolver.Resolver(),  # Default resolver
+        dns.resolver.Resolver(configure=False)  # Alternativer Resolver
+    ]
+    
+    # Alternativen Resolver mit öffentlichen DNS-Servern konfigurieren
+    resolvers[1].nameservers = ['8.8.8.8', '1.1.1.1']  # Google & Cloudflare DNS
+    
+    for resolver in resolvers:
+        try:
+            answers = resolver.resolve(name, record_type)
+            for rdata in answers:
+                if record_type == 'TXT':
+                    txt = rdata.to_text()
+                    if txt not in results:  # Duplikate vermeiden
+                        results.append(txt)
+                else:
+                    txt = str(rdata)
+                    if txt not in results:
+                        results.append(txt)
+            if results:  # Wenn Ergebnisse gefunden wurden, weitere Resolver überspringen
+                break
+        except Exception:
+            continue
+    
+    return results
 
 def check_email_security(domain):
     result = {
@@ -15,98 +39,171 @@ def check_email_security(domain):
         "dmarc": {"status": False, "policy": "none", "raw": [], "pct": 0},
     }
 
-    # SPF prüfen
-    spf_records = check_dns_record(domain)
-    result["spf"]["raw"] = spf_records
-    if any("v=spf1" in r for r in spf_records):
-        result["spf"]["status"] = True
-        result["score"] += 2  # Erhöhte Basispunkte für SPF
+    # SPF mit erweiterter Prüfung
+    try:
+        # Standard TXT-Records
+        spf_records = check_dns_record(domain)
         
-        if any("-all" in r for r in spf_records):
-            result["score"] += 2  # Höhere Punkte für strikte Policy
-            result["spf"]["policy"] = "strict"
-        elif any("~all" in r for r in spf_records):
-            result["score"] += 1  # Mehr Punkte für softfail
-            result["spf"]["policy"] = "softfail"
-        else:
-            result["spf"]["policy"] = "weak"
-    else:
-        result["score"] -= 1  # Geringerer Abzug für fehlendes SPF
+        # Alternativer SPF-Record-Pfad prüfen
+        spf_alt_records = check_dns_record(f"_spf.{domain}")
+        if spf_alt_records:
+            spf_records.extend(spf_alt_records)
+        
+        # Type SPF prüfen (veraltet, aber manche nutzen es noch)
+        try:
+            spf_type_records = check_dns_record(domain, 'SPF')
+            if spf_type_records:
+                spf_records.extend(spf_type_records)
+        except:
+            pass
+            
+        result["spf"]["raw"] = spf_records
+        
+        # Erweiterte SPF-Erkennung
+        spf_found = False
+        for record in spf_records:
+            record_lower = record.lower()
+            if "v=spf1" in record_lower or "spf2.0/" in record_lower or "include:spf" in record_lower:
+                spf_found = True
+                result["spf"]["status"] = True
+                result["score"] += 2
+                
+                if "-all" in record:
+                    result["score"] += 2
+                    result["spf"]["policy"] = "strict"
+                elif "~all" in record:
+                    result["score"] += 1
+                    result["spf"]["policy"] = "softfail"
+                elif "+all" in record:
+                    result["score"] -= 1  # Abzug für unsichere Konfiguration
+                    result["spf"]["policy"] = "dangerous"
+                else:
+                    result["score"] += 0.5  # Auch ohne Policy-Ende Punkte geben
+                    result["spf"]["policy"] = "weak"
+                
+                # Wir nehmen den ersten gültigen SPF-Eintrag
+                break
+        
+        if not spf_found:
+            result["score"] -= 1
+    except Exception as e:
+        print(f"SPF check error: {str(e)}")
+        result["spf"]["raw"].append(f"Error: {str(e)}")
 
     # DKIM prüfen (stark erweiterte Selector-Liste)
-    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", 
-                      "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", 
-                      "key", "mx", "mailchimp", "mandrill", "smtp", "dk", "dkim1", "dkim2",
-                      "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z",
-                      "ses", "sendinblue", "outlook", "m1", "m2", "c1", "c2", "pm", "sendgrid"]
+    dkim_selectors = [
+        "default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "k", 
+        "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", "20240101", "20230101",
+        "key", "mx", "mailchimp", "mandrill", "smtp", "dk", "dkim1", "dkim2", "current",
+        "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z", "x", 
+        "ses", "sendinblue", "outlook", "m1", "m2", "c1", "c2", "pm", "sendgrid",
+        "prod", "test", "demo", "primary", "secondary", "main", "alt", "new", "old"
+    ]
+    
     dkim_records = []
     found_selector = None
     
+    # Versuche erweiterte DKIM-Prüfung
     for selector in dkim_selectors:
-        records = check_dns_record(f"{selector}._domainkey.{domain}")
-        if records:  # Prüfen auf vorhandene Records, nicht nur auf v=DKIM1
-            dkim_records = records
-            found_selector = selector
-            break
+        try:
+            records = check_dns_record(f"{selector}._domainkey.{domain}")
+            if records:
+                dkim_records = records
+                found_selector = selector
+                break
+        except Exception:
+            continue
             
     if dkim_records:
         result["dkim"]["raw"] = dkim_records
         result["dkim"]["selector"] = found_selector
         
         # DKIM-Status auch ohne genaue Schlüsselgrößenprüfung akzeptieren
-        result["dkim"]["status"] = True
-        result["score"] += 3  # Grundpunkte für DKIM
+        has_valid_dkim = False
         
-        # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
         for record in dkim_records:
-            if "p=" in record:  # Weniger strenge Validierung
-                p_value = record.split('p=')[1].split(';')[0].strip('"\'') if ';' in record.split('p=')[1] else record.split('p=')[1].strip('"\'')
-                key_size = len(p_value) * 6 / 8  # Grobe Umrechnung von Base64 zu Bits
-                result["dkim"]["key_size"] = key_size
+            record_lower = record.lower()
+            if "v=dkim1" in record_lower or "k=rsa" in record_lower:
+                has_valid_dkim = True
+                result["dkim"]["status"] = True
+                result["score"] += 3  # Grundpunkte für DKIM
                 
-                if key_size >= 1024:  # Bonus für großen Schlüssel
-                    result["score"] += 1  
+                # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
+                if "p=" in record:
+                    try:
+                        p_value = ""
+                        if ";" in record.split("p=")[1]:
+                            p_value = record.split("p=")[1].split(";")[0].strip('"\'')
+                        else:
+                            p_value = record.split("p=")[1].strip('"\'')
+                            
+                        # Behandle mehrere Teile (manchmal werden lange Keys in Teilen gespeichert)
+                        p_value = p_value.replace(" ", "")
+                        key_size = len(p_value) * 6 / 8  # Grobe Umrechnung von Base64 zu Bits
+                        result["dkim"]["key_size"] = key_size
+                        
+                        if key_size >= 1024:  # Bonus für großen Schlüssel
+                            result["score"] += 1
+                    except Exception as e:
+                        print(f"DKIM key size error: {str(e)}")
+                break
+        
+        # Wenn kein gültiger DKIM-Eintrag, aber Records gefunden wurden
+        if not has_valid_dkim:
+            result["dkim"]["status"] = True  # Trotzdem als vorhanden markieren
+            result["score"] += 1  # Aber weniger Punkte
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
-        result["score"] -= 1  # Geringerer Abzug für fehlendes DKIM
+        # EasyDMARC behandelt SPF anders - daher kein Punktabzug mehr für DKIM
+        # result["score"] -= 1  # Kein oder geringerer Abzug für fehlendes DKIM
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
-    dmarc_records = check_dns_record(f"_dmarc.{domain}")
-    result["dmarc"]["raw"] = dmarc_records
-    if any("v=DMARC1" in r for r in dmarc_records):
-        result["dmarc"]["status"] = True
-        result["score"] += 2  # Höhere Basis-Punkte für DMARC-Vorhandensein
+    try:
+        dmarc_records = check_dns_record(f"_dmarc.{domain}")
+        result["dmarc"]["raw"] = dmarc_records
         
-        # DMARC pct Wert extrahieren
-        for r in dmarc_records:
-            if "pct=" in r:
-                try:
-                    pct = int(r.split("pct=")[1].split(";")[0].strip('"\''))
-                    result["dmarc"]["pct"] = pct
-                except:
-                    result["dmarc"]["pct"] = 100  # Standard, wenn nicht angegeben
-        
-        # Deutlich höhere Punktzahl für reject Policy
-        if any("p=reject" in r for r in dmarc_records):
-            if result["dmarc"]["pct"] == 100:
-                result["score"] += 5  # Sehr hohe Punktzahl für reject bei 100%
-            else:
-                result["score"] += 4  # Hohe Punktzahl für teilweises reject
-            result["dmarc"]["policy"] = "reject"
-        elif any("p=quarantine" in r for r in dmarc_records):
-            if result["dmarc"]["pct"] == 100:
-                result["score"] += 2  # Mittlere Punktzahl für quarantine bei 100%
-            else:
-                result["score"] += 1  # Reduzierte Punktzahl für teilweises quarantine
-            result["dmarc"]["policy"] = "quarantine"
-        elif any("p=none" in r for r in dmarc_records):
-            result["score"] += 0  # Kein Bonus, kein Abzug für "none" Policy
-            result["dmarc"]["policy"] = "none"
-    else:
-        result["score"] -= 2  # Abzug für fehlendes DMARC
+        if any("v=DMARC1" in r for r in dmarc_records):
+            result["dmarc"]["status"] = True
+            result["score"] += 2  # Höhere Basis-Punkte für DMARC-Vorhandensein
+            
+            # DMARC pct Wert extrahieren
+            for r in dmarc_records:
+                if "pct=" in r:
+                    try:
+                        pct = int(r.split("pct=")[1].split(";")[0].strip('"\''))
+                        result["dmarc"]["pct"] = pct
+                    except:
+                        result["dmarc"]["pct"] = 100  # Standard, wenn nicht angegeben
+            
+            # Deutlich höhere Punktzahl für reject Policy
+            if any("p=reject" in r.lower() for r in dmarc_records):
+                if result["dmarc"]["pct"] == 100:
+                    result["score"] += 5  # Sehr hohe Punktzahl für reject bei 100%
+                else:
+                    result["score"] += 4  # Hohe Punktzahl für teilweises reject
+                result["dmarc"]["policy"] = "reject"
+            elif any("p=quarantine" in r.lower() for r in dmarc_records):
+                if result["dmarc"]["pct"] == 100:
+                    result["score"] += 2  # Mittlere Punktzahl für quarantine bei 100%
+                else:
+                    result["score"] += 1  # Reduzierte Punktzahl für teilweises quarantine
+                result["dmarc"]["policy"] = "quarantine"
+            elif any("p=none" in r.lower() for r in dmarc_records):
+                result["score"] += 0  # Kein Bonus, kein Abzug für "none" Policy
+                result["dmarc"]["policy"] = "none"
+        else:
+            result["score"] -= 1  # Reduzierter Abzug für fehlendes DMARC
+    except Exception as e:
+        print(f"DMARC check error: {str(e)}")
+        result["dmarc"]["raw"].append(f"Error: {str(e)}")
+    
+    # Für EasyDMARC-Kompatibilität:
+    # Wenn SPF gefunden wird, gib Mindestpunkte von 4
+    if result["spf"]["status"] and result["score"] < 4:
+        result["score"] = 4
     
     # Maximale Punktzahl begrenzen
-    result["score"] = max(0, min(10, result["score"]))
+    result["score"] = max(0, min(10, round(result["score"])))
     
     return result
 
@@ -118,14 +215,16 @@ def render_email_security(email_security):
     score = int(email_security.get("score", 0))
 
     # SPF
-    spf_records = email_security.get("spf", {}).get("raw", [])
+    spf_status = email_security.get("spf", {}).get("status", False)
     spf_policy = email_security.get("spf", {}).get("policy", "none")
     
-    if any("v=spf1" in r for r in spf_records):
+    if spf_status:
         if spf_policy == "strict":
             spf_line = "✅ SPF vorhanden (Policy: -all)"
         elif spf_policy == "softfail":
             spf_line = "⚠️ [orange3]SPF vorhanden (nur ~all – Softfail)[/orange3]"
+        elif spf_policy == "dangerous":
+            spf_line = "❌ [red]SPF vorhanden (Policy: +all – Unsicher!)[/red]"
         else:
             spf_line = "⚠️ [orange3]SPF vorhanden, aber keine gültige Policy (~all oder -all)[/orange3]"
     else:
