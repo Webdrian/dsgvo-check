@@ -182,8 +182,8 @@ console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
 console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
 console.print()
 
-    # Abschnitt: SSL-Zertifikat
-    console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
+# Abschnitt: SSL-Zertifikat
+console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
     if ssl_info and "error" not in ssl_info:
         console.print(f"Issuer: {ssl_info['issuer']}")
         console.print(f"Common Name: {ssl_info['common_name']}")
