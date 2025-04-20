@@ -87,109 +87,53 @@ def check_email_security(domain):
         print(f"SPF check error: {str(e)}")
         result["spf"]["raw"].append(f"Error: {str(e)}")
 
-    # DKIM prüfen (stark erweiterte Selector-Liste)
+    # DKIM prüfen (vereinfachte und stabilere Variante)
     dkim_selectors = [
-        "default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "k", 
+        "default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "k",
         "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", "20240101", "20230101",
         "key", "mx", "mailchimp", "mandrill", "smtp", "dk", "dkim1", "dkim2", "current",
-        "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z", "x", 
+        "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z", "x",
         "ses", "sendinblue", "outlook", "m1", "m2", "c1", "c2", "pm", "sendgrid",
         "prod", "test", "demo", "primary", "secondary", "main", "alt", "new", "old"
     ]
-    
-    dkim_records = []
+
     found_selector = None
-    
-    # Versuche erweiterte DKIM-Prüfung
     for selector in dkim_selectors:
         try:
             records = check_dns_record(f"{selector}._domainkey.{domain}")
-            if records:
-                # Zusätzliche Validierung, dass es ein echter DKIM-Eintrag ist
-                valid_dkim = False
-                for record in records:
-                    if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
-                        if "p=" in record:
-                            try:
-                                p_value = ""
-                                if ";" in record.split("p=")[1]:
-                                    p_value = record.split("p=")[1].split(";")[0].strip('"\'')
-                                else:
-                                    p_value = record.split("p=")[1].strip('"\'')
-                                
-                                p_value = p_value.replace(" ", "")
-                                key_size = len(p_value) * 6 / 8  # Grobe Umrechnung
-                                result["dkim"]["key_size"] = key_size
-
-                                if key_size >= 384:  # Mindestgröße für glaubwürdigen DKIM Key
-                                    has_valid_dkim = True
-                                    result["dkim"]["status"] = True
-                                    debug_log.append(f"DKIM gültig mit {int(key_size)} Bit → +3")
-                                    result["score"] += 3
-                                    if key_size >= 1024:
-                                        result["score"] += 1
-                                        debug_log.append("DKIM Key ≥ 1024 → +1")
-                                else:
-                                    result["dkim"]["status"] = False
-                                    debug_log.append("DKIM Key zu schwach → -1")
-                                    result["score"] -= 1
-                            except Exception as e:
-                                print(f"DKIM key size error: {str(e)}")
-                        break
-                
-                if valid_dkim:
-                    dkim_records = records
-                    found_selector = selector
-                    # Debug-Ausgabe entfernt: print(f"✅ DKIM selector found: {found_selector}")
-                    break
-        except Exception:
-            continue
-            
-    if dkim_records:
-        result["dkim"]["raw"] = dkim_records
-        result["dkim"]["selector"] = found_selector
-        
-        has_valid_dkim = False
-
-        for record in dkim_records:
-            record_lower = record.lower()
-            if "v=dkim1" in record_lower or "k=rsa" in record_lower:
-                if "p=" in record:
+            for record in records:
+                if "v=dkim1" in record.lower() and "p=" in record:
                     try:
-                        p_value = ""
-                        if ";" in record.split("p=")[1]:
-                            p_value = record.split("p=")[1].split(";")[0].strip('"\'')
-                        else:
-                            p_value = record.split("p=")[1].strip('"\'')
-                            
-                        # Behandle mehrere Teile
-                        p_value = p_value.replace(" ", "")
-                        key_size = len(p_value) * 6 / 8  # Grobe Umrechnung
+                        p_value = record.split("p=", 1)[1].split(";")[0].strip().replace(" ", "")
+                        key_size = len(p_value) * 6 // 8  # grobe Umrechnung
                         result["dkim"]["key_size"] = key_size
-                        
+                        result["dkim"]["selector"] = selector
+                        result["dkim"]["raw"] = records
+
                         if key_size >= 384:
-                            has_valid_dkim = True
                             result["dkim"]["status"] = True
-                            debug_log.append(f"DKIM gültig mit {int(key_size)} Bit → +3")
+                            debug_log.append(f"DKIM gültig mit {key_size} Bit (Selector: {selector}) → +3")
                             result["score"] += 3
                             if key_size >= 1024:
                                 result["score"] += 1
                                 debug_log.append("DKIM Key ≥ 1024 → +1")
                         else:
                             result["dkim"]["status"] = False
-                            debug_log.append("DKIM Key zu schwach → -1")
+                            debug_log.append(f"DKIM Key zu schwach mit {key_size} Bit → -1")
                             result["score"] -= 1
+                        found_selector = selector
+                        break
                     except Exception as e:
-                        print(f"DKIM key size error: {str(e)}")
+                        debug_log.append(f"Fehler bei DKIM-Analyse: {str(e)}")
+            if found_selector:
                 break
+        except Exception as e:
+            debug_log.append(f"Fehler beim Abfragen von DKIM ({selector}): {str(e)}")
 
-        if not has_valid_dkim:
-            result["dkim"]["status"] = False
-            result["score"] -= 1
-    else:
+    if not result["dkim"]["status"]:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
-        result["score"] -= 1  # Abzug für fehlendes DKIM
-        # Debug-Ausgabe entfernt: print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
+        result["score"] -= 1
+        debug_log.append("❌ Kein gültiger DKIM-Record gefunden → -1")
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
     try:
