@@ -127,18 +127,18 @@ def visualize_email_security(email_security):
     # Layout für Score und Protokolle
     layout = Layout()
     layout.split_row(
-        Layout(name="score", size=20),
-        Layout(name="protocols")
+        Layout(name="protocols", ratio=3),  # Vergrößert für Protokolle
+        Layout(name="score", ratio=1)       # Verkleinert für Score
     )
     
     # Score section
-    score_circle = f"""
+    score_text = f"""
           Score
           
           [bold]{score}[/bold]
          of 10
     """
-    layout["score"].update(Align.center(Text(score_circle, justify="center"), vertical="middle"))
+    layout["score"].update(Align.center(Text(score_text, justify="center"), vertical="middle"))
     
     # Protokolle section
     layout["protocols"].split_row(
@@ -179,12 +179,10 @@ def visualize_email_security(email_security):
     console.print(layout)
     console.print()
     
-    # Buttons
-    console.print(Align.center(
-        Panel(" See Details ", width=20, border_style="blue", box=box.ROUNDED) + 
-        "   " + 
-        Panel(" Start DMARC Journey ", width=30, border_style="blue", box=box.ROUNDED, style="bold white on blue")
-    ))
+    # KORRIGIERT: Buttons korrekt darstellen
+    # Erstelle Buttons separat und gebe sie nacheinander aus
+    console.print(Align.center(Panel(" See Details ", width=20, border_style="blue", box=box.ROUNDED)))
+    console.print(Align.center(Panel(" Start DMARC Journey ", width=30, border_style="blue", box=box.ROUNDED, style="bold white on blue")))
     console.print()
 
 def render_email_security(email_security):
