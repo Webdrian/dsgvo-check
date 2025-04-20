@@ -242,6 +242,15 @@ def check_email_security(domain):
     ):
         result["score"] = 4
 
+    # Mindestscore wenn nur SPF vorhanden, kein DKIM/DMARC – analog EasyDMARC
+    if (
+        result["spf"]["status"]
+        and not result["dkim"]["status"]
+        and not result["dmarc"]["status"]
+        and result["score"] < 3
+    ):
+        result["score"] = 3
+
     return result
 
 def render_email_security(email_security):
