@@ -231,7 +231,17 @@ def check_email_security(domain):
         and not result["dkim"]["status"]
     ):
         result["score"] = 4
-    
+
+    # Fallback-Regel wie bei EasyDMARC: SPF + DMARC (p=none) + kein DKIM → min 4 Punkte
+    if (
+        result["spf"]["status"]
+        and result["dmarc"]["status"]
+        and result["dmarc"]["policy"] == "none"
+        and not result["dkim"]["status"]
+        and result["score"] < 4
+    ):
+        result["score"] = 4
+
     return result
 
 def render_email_security(email_security):
