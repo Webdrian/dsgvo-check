@@ -21,7 +21,7 @@ def check_dns_record(name, record_type='TXT'):
             if results:
                 break  # Wenn Ergebnisse gefunden, nicht weitermachen
         except Exception as e:
-            print(f"[Resolver {idx}] Fehler bei DNS-Check ({name}, {record_type}): {e}")
+            # Debug-Ausgabe entfernt: print(f"[Resolver {idx}] Fehler bei DNS-Check ({name}, {record_type}): {e}")
             continue
     return results
 
@@ -109,7 +109,7 @@ def check_email_security(domain):
                 if valid_dkim:
                     dkim_records = records
                     found_selector = selector
-                    print(f"✅ DKIM selector found: {found_selector}")
+                    # Debug-Ausgabe entfernt: print(f"✅ DKIM selector found: {found_selector}")
                     break
         except Exception:
             continue
@@ -155,7 +155,7 @@ def check_email_security(domain):
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
         result["score"] -= 1  # Abzug für fehlendes DKIM
-        print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
+        # Debug-Ausgabe entfernt: print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
     try:
