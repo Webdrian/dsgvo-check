@@ -214,10 +214,14 @@ def check_email_security(domain):
     # Maximale Punktzahl begrenzen und runden
     result["score"] = max(0, min(10, round(result["score"])))
     
-    # Wenn nur SPF vorhanden (DKIM & DMARC fehlen), vergib EasyDMARC-kompatibel mindestens 3 Punkte
-    if result["spf"]["status"] and not result["dkim"]["status"] and not result["dmarc"]["status"]:
-        result["score"] = max(result["score"], 3)
-        result["score"] = min(result["score"], 3)
+    # EasyDMARC-kompatible Bewertung, wenn SPF vorhanden, DMARC vorhanden aber p=none, und kein DKIM
+    if (
+        result["spf"]["status"]
+        and result["dmarc"]["status"]
+        and result["dmarc"]["policy"] == "none"
+        and not result["dkim"]["status"]
+    ):
+        result["score"] = 4
     
     return result
 
