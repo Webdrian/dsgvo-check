@@ -355,5 +355,12 @@ def render_email_security(email_security):
     lines.append(risk_description)
     lines.append("")
     lines.append(f"🔐 [yellow]Gesamtbewertung: {score}/10 – {level}[/yellow]")
+    # scoring_reason anzeigen (wenn vorhanden)
+    reasons = email_security.get("scoring_reason", [])
+    if reasons:
+        lines.append("")
+        lines.append("[bold]Begründung der Bewertung:[/bold]")
+        for r in reasons:
+            lines.append(f"- {r}")
     lines.append("Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.")
     return lines
