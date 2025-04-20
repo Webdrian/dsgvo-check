@@ -3,32 +3,26 @@ import time
 
 def check_dns_record(name, record_type='TXT'):
     results = []
-    # Mehrere DNS-Server verwenden
     resolvers = [
-        dns.resolver.Resolver(),  # Default resolver
-        dns.resolver.Resolver(configure=False)  # Alternativer Resolver
+        dns.resolver.Resolver(),  # Standard-Resolver
+        dns.resolver.Resolver(configure=False)  # Alternativ-Resolver mit Google & Cloudflare
     ]
-    
-    # Alternativen Resolver mit öffentlichen DNS-Servern konfigurieren
-    resolvers[1].nameservers = ['8.8.8.8', '1.1.1.1']  # Google & Cloudflare DNS
-    
-    for resolver in resolvers:
+    resolvers[0].lifetime = 2.0
+    resolvers[1].nameservers = ['8.8.8.8', '1.1.1.1']
+    resolvers[1].lifetime = 2.0
+
+    for idx, resolver in enumerate(resolvers):
         try:
             answers = resolver.resolve(name, record_type)
             for rdata in answers:
-                if record_type == 'TXT':
-                    txt = rdata.to_text()
-                    if txt not in results:  # Duplikate vermeiden
-                        results.append(txt)
-                else:
-                    txt = str(rdata)
-                    if txt not in results:
-                        results.append(txt)
-            if results:  # Wenn Ergebnisse gefunden wurden, weitere Resolver überspringen
-                break
-        except Exception:
+                txt = rdata.to_text() if record_type == 'TXT' else str(rdata)
+                if txt not in results:
+                    results.append(txt)
+            if results:
+                break  # Wenn Ergebnisse gefunden, nicht weitermachen
+        except Exception as e:
+            print(f"[Resolver {idx}] Fehler bei DNS-Check ({name}, {record_type}): {e}")
             continue
-    
     return results
 
 def check_email_security(domain):
@@ -115,6 +109,7 @@ def check_email_security(domain):
                 if valid_dkim:
                     dkim_records = records
                     found_selector = selector
+                    print(f"✅ DKIM selector found: {found_selector}")
                     break
         except Exception:
             continue
@@ -160,6 +155,7 @@ def check_email_security(domain):
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
         result["score"] -= 1  # Abzug für fehlendes DKIM
+        print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
     try:
