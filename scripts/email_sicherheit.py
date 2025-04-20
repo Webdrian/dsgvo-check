@@ -20,29 +20,31 @@ def check_email_security(domain):
     result["spf"]["raw"] = spf_records
     if any("v=spf1" in r for r in spf_records):
         result["spf"]["status"] = True
-        result["score"] += 1  # Reduzierte Basispunkte für SPF
+        result["score"] += 2  # Erhöhte Basispunkte für SPF
         
         if any("-all" in r for r in spf_records):
             result["score"] += 2  # Höhere Punkte für strikte Policy
             result["spf"]["policy"] = "strict"
         elif any("~all" in r for r in spf_records):
-            result["score"] += 0.5  # Geringe Punkte für softfail
+            result["score"] += 1  # Mehr Punkte für softfail
             result["spf"]["policy"] = "softfail"
         else:
             result["spf"]["policy"] = "weak"
     else:
-        result["score"] -= 2  # Höherer Abzug für fehlendes SPF
+        result["score"] -= 1  # Geringerer Abzug für fehlendes SPF
 
-    # DKIM prüfen (erweiterte Selector-Liste)
+    # DKIM prüfen (stark erweiterte Selector-Liste)
     dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", 
                       "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", 
-                      "key", "mx", "mailchimp", "mandrill", "smtp", "dk"]
+                      "key", "mx", "mailchimp", "mandrill", "smtp", "dk", "dkim1", "dkim2",
+                      "mail1", "mail2", "mail3", "mailjet", "20", "19", "18", "global", "z",
+                      "ses", "sendinblue", "outlook", "m1", "m2", "c1", "c2", "pm", "sendgrid"]
     dkim_records = []
     found_selector = None
     
     for selector in dkim_selectors:
         records = check_dns_record(f"{selector}._domainkey.{domain}")
-        if any("v=DKIM1" in r for r in records):
+        if records:  # Prüfen auf vorhandene Records, nicht nur auf v=DKIM1
             dkim_records = records
             found_selector = selector
             break
@@ -51,34 +53,29 @@ def check_email_security(domain):
         result["dkim"]["raw"] = dkim_records
         result["dkim"]["selector"] = found_selector
         
+        # DKIM-Status auch ohne genaue Schlüsselgrößenprüfung akzeptieren
+        result["dkim"]["status"] = True
+        result["score"] += 3  # Grundpunkte für DKIM
+        
         # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
-        key_size = 0
         for record in dkim_records:
-            if "v=DKIM1" in record and "p=" in record:
-                # Vereinfachte Schätzung der Schlüsselgröße basierend auf Länge
-                p_value = record.split('p=')[1].split(';')[0].strip('"\'')
+            if "p=" in record:  # Weniger strenge Validierung
+                p_value = record.split('p=')[1].split(';')[0].strip('"\'') if ';' in record.split('p=')[1] else record.split('p=')[1].strip('"\'')
                 key_size = len(p_value) * 6 / 8  # Grobe Umrechnung von Base64 zu Bits
                 result["dkim"]["key_size"] = key_size
                 
-                if key_size >= 2048:
-                    result["score"] += 3  # Volle Punktzahl für starken Schlüssel
-                    result["dkim"]["status"] = True
-                elif key_size >= 1024:
-                    result["score"] += 2  # Reduzierte Punktzahl für mittleren Schlüssel
-                    result["dkim"]["status"] = True
-                else:
-                    result["score"] += 0.5  # Sehr geringe Punktzahl für schwachen Schlüssel
-                    result["dkim"]["status"] = True
+                if key_size >= 1024:  # Bonus für großen Schlüssel
+                    result["score"] += 1  
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
-        result["score"] -= 2  # Höherer Abzug für fehlendes DKIM
+        result["score"] -= 1  # Geringerer Abzug für fehlendes DKIM
 
-    # DMARC prüfen - Strenger bewerten
+    # DMARC prüfen - Deutlich höhere Bewertung für reject
     dmarc_records = check_dns_record(f"_dmarc.{domain}")
     result["dmarc"]["raw"] = dmarc_records
     if any("v=DMARC1" in r for r in dmarc_records):
         result["dmarc"]["status"] = True
-        result["score"] += 1  # Basis-Punkte für DMARC-Vorhandensein
+        result["score"] += 2  # Höhere Basis-Punkte für DMARC-Vorhandensein
         
         # DMARC pct Wert extrahieren
         for r in dmarc_records:
@@ -89,23 +86,24 @@ def check_email_security(domain):
                 except:
                     result["dmarc"]["pct"] = 100  # Standard, wenn nicht angegeben
         
+        # Deutlich höhere Punktzahl für reject Policy
         if any("p=reject" in r for r in dmarc_records):
             if result["dmarc"]["pct"] == 100:
-                result["score"] += 3  # Volle Punktzahl für reject bei 100%
+                result["score"] += 5  # Sehr hohe Punktzahl für reject bei 100%
             else:
-                result["score"] += 2  # Reduzierte Punktzahl für teilweises reject
+                result["score"] += 4  # Hohe Punktzahl für teilweises reject
             result["dmarc"]["policy"] = "reject"
         elif any("p=quarantine" in r for r in dmarc_records):
             if result["dmarc"]["pct"] == 100:
-                result["score"] += 1.5  # Mittlere Punktzahl für quarantine bei 100%
+                result["score"] += 2  # Mittlere Punktzahl für quarantine bei 100%
             else:
                 result["score"] += 1  # Reduzierte Punktzahl für teilweises quarantine
             result["dmarc"]["policy"] = "quarantine"
         elif any("p=none" in r for r in dmarc_records):
-            result["score"] -= 1  # Abzug für "none" Policy - nur Monitoring ohne Schutz
+            result["score"] += 0  # Kein Bonus, kein Abzug für "none" Policy
             result["dmarc"]["policy"] = "none"
     else:
-        result["score"] -= 3  # Stärkerer Abzug für fehlendes DMARC
+        result["score"] -= 2  # Abzug für fehlendes DMARC
     
     # Maximale Punktzahl begrenzen
     result["score"] = max(0, min(10, result["score"]))
@@ -143,9 +141,9 @@ def render_email_security(email_security):
         if dkim_key_size >= 2048:
             dkim_line = f"✅ DKIM vorhanden (Selector: {dkim_selector}, Schlüsselstärke: stark)"
         elif dkim_key_size >= 1024:
-            dkim_line = f"⚠️ [yellow]DKIM vorhanden (Selector: {dkim_selector}, Schlüsselstärke: mittel)[/yellow]"
+            dkim_line = f"✅ DKIM vorhanden (Selector: {dkim_selector})"
         else:
-            dkim_line = f"⚠️ [orange3]DKIM vorhanden (Selector: {dkim_selector}, Schlüsselstärke: schwach)[/orange3]"
+            dkim_line = f"✅ DKIM vorhanden (Selector: {dkim_selector})"
     else:
         dkim_line = "❌ [red]DKIM fehlt oder falsch konfiguriert[/red]"
     lines.append(dkim_line)
