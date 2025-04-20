@@ -1,5 +1,11 @@
 import dns.resolver
-from rich.console import Console
+
+def check_dns_record(name):
+    try:
+        answers = dns.resolver.resolve(name, 'TXT')
+        return [r.to_text() for r in answers]
+    except:
+        return []
 
 def check_email_security(domain):
     result = {
@@ -21,7 +27,9 @@ def check_email_security(domain):
             result["score"] += 0.5
 
     # DKIM prüfen (erweiterte Selector-Liste)
-    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "2023", "2024", "s1", "s2", "selector2", "mta"]
+    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", 
+                      "2023", "2024", "s1", "s2", "selector2", "mta", "domainkey", 
+                      "key", "mx", "mailchimp", "mandrill", "smtp", "dk"]
     dkim_records = []
     found_selector = None
     
@@ -61,58 +69,6 @@ def check_email_security(domain):
     return result
 
 def render_email_security(email_security):
-    """
-    Einfache Darstellung der E-Mail-Sicherheit im Format wie im Screenshot.
-    """
-    console = Console()
-    
-    # Header
-    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    
-    # Extrahiere Werte
-    score = int(email_security.get("score", 0))
-    spf_status = email_security.get("spf", {}).get("status", False)
-    dkim_status = email_security.get("dkim", {}).get("status", False)
-    dmarc_status = email_security.get("dmarc", {}).get("status", False)
-    dmarc_policy = email_security.get("dmarc", {}).get("policy", "none")
-
-    # SPF Status
-    if spf_status:
-        console.print("[green]✓[/green] SPF vorhanden")
-    else:
-        console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
-    
-    # DKIM Status
-    if dkim_status:
-        console.print("[green]✓[/green] DKIM vorhanden")
-    else:
-        console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
-    
-    # DMARC Status
-    if dmarc_status:
-        policy_text = f"(Policy: {dmarc_policy})"
-        console.print(f"[green]✓[/green] DMARC vorhanden {policy_text}")
-    else:
-        console.print("[red]✗[/red] [red]DMARC fehlt oder falsch konfiguriert[/red]")
-    
-    console.print()
-    
-    # Gesamtbewertung
-    rating = "Keine Bewertung verfügbar"
-    if score >= 9:
-        rating = "Sehr gut geschützt"
-    elif score >= 6:
-        rating = "Gut, aber Verbesserung möglich"
-    elif score >= 3:
-        rating = "Verbesserung dringend nötig"
-    else:
-        rating = "Kritisch – Sofort handeln"
-    
-    console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
-    console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
-
-# Diese Funktion ist für die Rückwärtskompatibilität und eignet sich eher für programmatische Nutzung
-def render_email_security_lines(email_security):
     lines = []
     lines.append("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     lines.append("")
@@ -134,10 +90,11 @@ def render_email_security_lines(email_security):
 
     # DKIM
     dkim_records = email_security.get("dkim", {}).get("raw", [])
+    dkim_selector = email_security.get("dkim", {}).get("selector", "nicht gefunden")
     if "DKIM selectors not found" in dkim_records:
         dkim_line = "❌ [red]DKIM fehlt – keine Selector gefunden[/red]"
     elif any("v=DKIM1" in r and "p=" in r for r in dkim_records):
-        dkim_line = "✅ DKIM vorhanden"
+        dkim_line = f"✅ DKIM vorhanden (Selector: {dkim_selector})"
     else:
         dkim_line = "❌ [red]DKIM fehlt oder falsch konfiguriert[/red]"
     lines.append(dkim_line)
