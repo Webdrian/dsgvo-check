@@ -28,6 +28,7 @@ def check_dns_record(name, record_type='TXT'):
 def check_email_security(domain):
     result = {
         "score": 0,
+        "scoring_reason": [],
         "spf": {"status": False, "raw": [], "policy": "none"},
         "dkim": {"status": False, "raw": [], "selector": None, "key_size": 0},
         "dmarc": {"status": False, "policy": "none", "raw": [], "pct": 0},
@@ -62,21 +63,25 @@ def check_email_security(domain):
             if "v=spf1" in record_lower:
                 result["spf"]["status"] = True
                 result["score"] += 2  # SPF vorhanden
+                result["scoring_reason"].append("SPF vorhanden (+2)")
                 if "-all" in record_lower:
                     result["score"] += 2
                     result["spf"]["policy"] = "strict"
+                    result["scoring_reason"].append("SPF-Policy ist -all (strict) (+2)")
                 elif "~all" in record_lower:
                     result["score"] += 0.5
                     result["spf"]["policy"] = "softfail"
+                    result["scoring_reason"].append("SPF-Policy ist ~all (softfail) (+0.5)")
                 elif "+all" in record_lower:
                     result["score"] -= 1
                     result["spf"]["policy"] = "dangerous"
-                else:
-                    result["spf"]["policy"] = "weak"
+                    result["scoring_reason"].append("SPF-Policy ist +all (unsicher) (-1)")
+                spf_found = True
                 break
         
         if not spf_found:
             result["score"] -= 1
+            result["scoring_reason"].append("Kein gültiger SPF-Record gefunden (-1)")
     except Exception as e:
         print(f"SPF check error: {str(e)}")
         result["spf"]["raw"].append(f"Error: {str(e)}")
@@ -127,6 +132,7 @@ def check_email_security(domain):
                 has_valid_dkim = True
                 result["dkim"]["status"] = True
                 result["score"] += 3  # Grundpunkte für DKIM
+                result["scoring_reason"].append("DKIM vorhanden (+3)")
                 
                 # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
                 if "p=" in record:
@@ -144,6 +150,7 @@ def check_email_security(domain):
                         
                         if key_size >= 1024:  # Bonus für großen Schlüssel
                             result["score"] += 1
+                            result["scoring_reason"].append("DKIM-Schlüsselstärke ≥ 1024 Bit (+1)")
                     except Exception as e:
                         print(f"DKIM key size error: {str(e)}")
                 break
@@ -152,9 +159,11 @@ def check_email_security(domain):
         if not has_valid_dkim:
             result["dkim"]["status"] = False  # Als nicht vorhanden markieren
             result["score"] -= 1  # Abzug für ungültigen DKIM
+            result["scoring_reason"].append("DKIM fehlt oder ungültig (-1)")
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
         result["score"] -= 1  # Abzug für fehlendes DKIM
+        result["scoring_reason"].append("DKIM fehlt oder ungültig (-1)")
         # Debug-Ausgabe entfernt: print(f"❌ No DKIM selector found after testing {len(dkim_selectors)} selectors.")
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
@@ -165,6 +174,7 @@ def check_email_security(domain):
         if any("v=DMARC1" in r for r in dmarc_records):
             result["dmarc"]["status"] = True
             result["score"] += 1  # DMARC vorhanden
+            result["scoring_reason"].append("DMARC vorhanden (+1)")
 
             # DMARC pct Wert extrahieren
             for r in dmarc_records:
@@ -178,14 +188,18 @@ def check_email_security(domain):
             if any("p=reject" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "reject"
                 result["score"] += 5 if result["dmarc"]["pct"] == 100 else 4
+                result["scoring_reason"].append("DMARC-Policy ist reject (+5)")
             elif any("p=quarantine" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "quarantine"
                 result["score"] += 2 if result["dmarc"]["pct"] == 100 else 1
+                result["scoring_reason"].append("DMARC-Policy ist quarantine (+2)")
             elif any("p=none" in r.lower() for r in dmarc_records):
                 result["dmarc"]["policy"] = "none"
                 result["score"] -= 1
+                result["scoring_reason"].append("DMARC-Policy ist none (-1)")
         else:
             result["score"] -= 1  # Kein DMARC
+            result["scoring_reason"].append("DMARC fehlt oder ungültig (-1)")
     except Exception as e:
         print(f"DMARC check error: {str(e)}")
         result["dmarc"]["raw"].append(f"Error: {str(e)}")
@@ -201,6 +215,7 @@ def check_email_security(domain):
         and not result["dkim"]["status"]
     ):
         result["score"] = 7
+        result["scoring_reason"].append("SPF + DMARC reject vorhanden, aber DKIM fehlt → Score auf 7 gesetzt")
     elif (
         result["spf"]["status"]
         and result["spf"]["policy"] == "strict"
@@ -209,6 +224,7 @@ def check_email_security(domain):
         and not result["dkim"]["status"]
     ):
         result["score"] = 6
+        result["scoring_reason"].append("SPF + DMARC quarantine vorhanden, aber DKIM fehlt → Score auf 6 gesetzt")
     
     # 3. Wenn SPF mit -all und DMARC=reject, mindestens 8 Punkte
     elif (result["spf"]["status"] and result["spf"]["policy"] == "strict" and 
@@ -231,6 +247,7 @@ def check_email_security(domain):
         and not result["dkim"]["status"]
     ):
         result["score"] = 4
+        result["scoring_reason"].append("SPF + DMARC none vorhanden, aber DKIM fehlt → Score auf 4 gesetzt")
 
     # Fallback-Regel wie bei EasyDMARC: SPF + DMARC (p=none) + kein DKIM → min 4 Punkte
     if (
@@ -241,6 +258,7 @@ def check_email_security(domain):
         and result["score"] < 4
     ):
         result["score"] = 4
+        result["scoring_reason"].append("Fallback: min. 4 Punkte bei SPF + DMARC(p=none) ohne DKIM")
 
     # Mindestscore wenn nur SPF vorhanden, kein DKIM/DMARC – analog EasyDMARC
     if (
@@ -250,6 +268,7 @@ def check_email_security(domain):
         and result["score"] < 3
     ):
         result["score"] = 3
+        result["scoring_reason"].append("Fallback: min. 3 Punkte bei SPF-only ohne DKIM/DMARC")
 
     return result
 
