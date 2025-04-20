@@ -146,19 +146,19 @@ def main():
 
   # Ersetze in der main() Funktion den Abschnitt "E-Mail-Sicherheit" mit diesem Code:
 
-    # Abschnitt: E-Mail-Sicherheit
-    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
+# Abschnitt: E-Mail-Sicherheit
+console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
-    # SPF Status
-    spf_status = str(email_security["spf"].get("status", "")).lower() in ["valid", "pass", "true"]
-    if spf_status:
-        console.print("[green]✓[/green] SPF vorhanden")
-    else:
+# SPF Status
+spf_status = str(email_security["spf"].get("status", "")).lower() in ["valid", "pass", "true"]
+if spf_status:
+    console.print("[green]✓[/green] SPF vorhanden")
+else:
     console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
 
-    # DKIM Status
-    dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
-    if dkim_status:
+# DKIM Status
+dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
+if dkim_status:
     console.print("[green]✓[/green] DKIM vorhanden")
 else:
     console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
