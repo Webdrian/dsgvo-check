@@ -2,7 +2,7 @@ from fetching import fetch_html_and_requests, extract_meta
 from cms import detect_cms, detect_wordpress_theme, detect_plugins
 from ssl_info import get_ssl_info
 from cookies import analyze_cookies, load_cookie_db
-from email_sicherheit import check_email_security, visualize_email_security
+from email_sicherheit import check_email_security
 from dsgvo import evaluate_risks
 from urllib.parse import urlparse
 from rich.console import Console
@@ -144,49 +144,52 @@ def main():
         console.print("Keine Cookies erkannt.")
     console.print()
 
-# Abschnitt: E-Mail-Sicherheit
-console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
+    # Abschnitt: E-Mail-Sicherheit
+    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
 
-# SPF Status
-spf_status = str(email_security["spf"].get("status", "")).lower() in ["valid", "pass", "true"]
-if spf_status:
-    console.print("[green]✓[/green] SPF vorhanden")
-else:
-    console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
+    # SPF Status
+    spf_status = str(email_security["spf"].get("status", "")).lower() in ["valid", "pass", "true"]
+    if spf_status:
+        console.print("[green]✓[/green] SPF vorhanden")
+    else:
+        console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
 
-# DKIM Status
-dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
-if dkim_status:
-    console.print("[green]✓[/green] DKIM vorhanden")
-else:
-    console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
+    # DKIM Status
+    dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
+    if dkim_status:
+        console.print("[green]✓[/green] DKIM vorhanden")
+    else:
+        console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
 
-# DMARC Status
-dmarc_status = str(email_security["dmarc"].get("status", "")).lower() in ["valid", "pass", "true"]
-dmarc_policy = email_security["dmarc"].get("policy", "none")
-if dmarc_status:
-    policy_text = f"(Policy: {dmarc_policy})"
-    console.print(f"[green]✓[/green] DMARC vorhanden {policy_text}")
-else:
-    console.print("[red]✗[/red] [red]DMARC fehlt oder falsch konfiguriert[/red]")
+    # DMARC Status
+    dmarc_status = str(email_security["dmarc"].get("status", "")).lower() in ["valid", "pass", "true"]
+    dmarc_policy = email_security["dmarc"].get("policy", "none")
+    if dmarc_status:
+        policy_text = f"(Policy: {dmarc_policy})"
+        console.print(f"[green]✓[/green] DMARC vorhanden {policy_text}")
+    else:
+        console.print("[red]✗[/red] [red]DMARC fehlt oder falsch konfiguriert[/red]")
 
-console.print()
+    console.print()
 
-# Gesamtbewertung
-score = int(email_security.get("score") or 0)
-rating = email_security.get("rating", "Keine Bewertung verfügbar")
+    # Gesamtbewertung
+    score = int(email_security.get("score") or 0)
+    rating = email_security.get("rating", "Keine Bewertung verfügbar")
 
-console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
-console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
-console.print()
+    console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
+    console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
+    console.print()
 
-# Abschnitt: SSL-Zertifikat
-console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
-if ssl_info and "error" not in ssl_info:
-    console.print(f"Issuer: {ssl_info['issuer']}")
-    console.print(f"Common Name: {ssl_info['common_name']}")
-    console.print(f"Gültig von: {ssl_info['valid_from']} bis {ssl_info['valid_to']}")
-    console.print(f"SHA-1: {ssl_info['sha1']}")
-    console.print(f"SHA-256: {ssl_info['sha256']}")
-else:
-    console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+    # Abschnitt: SSL-Zertifikat
+    console.rule("[bold white]7. SSL-Zertifikat[/bold white]")
+    if ssl_info and "error" not in ssl_info:
+        console.print(f"Issuer: {ssl_info['issuer']}")
+        console.print(f"Common Name: {ssl_info['common_name']}")
+        console.print(f"Gültig von: {ssl_info['valid_from']} bis {ssl_info['valid_to']}")
+        console.print(f"SHA-1: {ssl_info['sha1']}")
+        console.print(f"SHA-256: {ssl_info['sha256']}")
+    else:
+        console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+
+if __name__ == "__main__":
+    main()
