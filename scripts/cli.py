@@ -1,5 +1,5 @@
 from fetching import fetch_html_and_requests, extract_meta
-from cms import detect_cms, detect_wordpress_theme, detect_plugins
+from cms import detect_cms, detect_wordpress_theme, detect_plugins, detect_technologies
 from ssl_info import get_ssl_info
 from cookies import analyze_cookies, load_cookie_db
 from email_sicherheit import check_email_security
@@ -19,6 +19,7 @@ def main():
     # Abruf der HTML-Daten, Cookies, etc.
     html, network_requests, pre_consent_requests, cookie_tool, cookie_banner = fetch_html_and_requests(url)
     title, desc = extract_meta(html)
+    technologies = detect_technologies(html)
     cms_list, builder_list = detect_cms(html)
     theme = detect_wordpress_theme(html)
     plugins = detect_plugins(html)
@@ -71,8 +72,17 @@ def main():
         for plugin in plugins:
             console.print(f"  • {plugin}")
     else:
-        console.print("[bold]Plugins:[/bold] Keine erkannt")
+    console.print("[bold]Plugins:[/bold] Keine erkannt")
     console.print()
+    # Erweiterte Technologien
+    if technologies["frameworks"]:
+        console.print(f"[bold]Frameworks:[/bold] {', '.join(technologies['frameworks'])}")
+    if technologies["hosting"]:
+        console.print(f"[bold]Hosting/CDN:[/bold] {', '.join(technologies['hosting'])}")
+    if technologies["shop"]:
+        console.print(f"[bold]Shopsysteme:[/bold] {', '.join(technologies['shop'])}")
+    if technologies["trackers"]:
+        console.print(f"[bold]Technisch erkannte Tracker:[/bold] {', '.join(technologies['trackers'])}")
 
     # Abschnitt: Tracker
     console.rule("[bold magenta]3. Tracker[/bold magenta]")
