@@ -105,11 +105,16 @@ def check_email_security(domain):
             records = check_dns_record(f"{selector}._domainkey.{domain}")
             if records:
                 # Zusätzliche Validierung, dass es ein echter DKIM-Eintrag ist
-                valid_dkim = False
+                has_v_dkim1 = False
+                has_p = False
                 for record in records:
-                    if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
-                        valid_dkim = True
-                        break
+                    r = record.lower()
+                    if "v=dkim1" in r:
+                        has_v_dkim1 = True
+                    if "p=" in r:
+                        has_p = True
+                if has_v_dkim1 and has_p:
+                    valid_dkim = True
                 
                 if valid_dkim:
                     dkim_records = records
