@@ -12,7 +12,7 @@ def check_email_security(domain):
     result = {
         "score": 0,
         "spf": {"status": False, "raw": []},
-        "dkim": {"status": False, "raw": []},
+        "dkim": {"status": False, "raw": [], "selector": None},  # Selector hinzugefügt
         "dmarc": {"status": False, "policy": "none", "raw": []},
     }
 
@@ -27,16 +27,21 @@ def check_email_security(domain):
         elif any("~all" in r for r in spf_records):
             result["score"] += 0.5
 
-    # DKIM prüfen (Selector "default")
-    dkim_selectors = ["default", "mail", "selector1", "email", "google"]
+    # DKIM prüfen (erweiterte Selector-Liste)
+    dkim_selectors = ["default", "mail", "selector1", "email", "google", "dkim", "k1", "key1", "2023", "2024", "s1", "s2", "selector2"]
     dkim_records = []
+    found_selector = None
+    
     for selector in dkim_selectors:
         records = check_dns_record(f"{selector}._domainkey.{domain}")
         if any("v=DKIM1" in r for r in records):
             dkim_records = records
+            found_selector = selector
             break
+            
     if dkim_records:
         result["dkim"]["raw"] = dkim_records
+        result["dkim"]["selector"] = found_selector
         if any("v=DKIM1" in r and "p=" in r for r in dkim_records):
             result["dkim"]["status"] = True
             result["score"] += 3
