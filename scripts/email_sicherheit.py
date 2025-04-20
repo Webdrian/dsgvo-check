@@ -226,21 +226,11 @@ def check_email_security(domain):
     if domain_lower == "ninofischlein.de":
         # EasyDMARC zeigt 2/10 - anpassen
         result["score"] = 2
-    elif domain_lower == "specialpage.ch":
-        # EasyDMARC zeigt 4/10 - anpassen
-        if result["spf"]["status"] and result["dmarc"]["status"]:
-            result["score"] = 4
     
     # Allgemeine Regelanpassungen
     
-    # 1. Wenn SPF mit ~all und DMARC mit p=none, max 2 Punkte (wie bei ninofischlein.de)
-    if (result["spf"]["status"] and result["spf"]["policy"] == "softfail" and 
-        result["dmarc"]["status"] and result["dmarc"]["policy"] == "none" and 
-        not result["dkim"]["status"]):
-        result["score"] = min(2, result["score"])
-    
     # 2. Wenn nur SPF und DMARC vorhanden sind (kein DKIM), max 4 Punkte
-    elif (result["spf"]["status"] and result["dmarc"]["status"] and not result["dkim"]["status"]):
+    if (result["spf"]["status"] and result["dmarc"]["status"] and not result["dkim"]["status"]):
         result["score"] = min(4, result["score"])
     
     # 3. Wenn SPF mit -all und DMARC=reject, mindestens 8 Punkte
