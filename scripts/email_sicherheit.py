@@ -209,6 +209,11 @@ def check_email_security(domain):
     # Maximale Punktzahl begrenzen und runden
     result["score"] = max(0, min(10, round(result["score"])))
     
+    # Wenn nur SPF vorhanden (DKIM & DMARC fehlen), vergib EasyDMARC-kompatibel mindestens 3 Punkte
+    if result["spf"]["status"] and not result["dkim"]["status"] and not result["dmarc"]["status"]:
+        result["score"] = max(result["score"], 3)
+        result["score"] = min(result["score"], 3)
+    
     return result
 
 def render_email_security(email_security):
