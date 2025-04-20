@@ -66,19 +66,19 @@ def check_email_security(domain):
             if "v=spf1" in record_lower or "spf2.0/" in record_lower or "include:spf" in record_lower:
                 spf_found = True
                 result["spf"]["status"] = True
-                result["score"] += 2
+                result["score"] += 1  # Basispunkte für SPF-Vorhandensein
                 
                 if "-all" in record:
-                    result["score"] += 2
+                    result["score"] += 2  # Höhere Punkte für strikte Policy
                     result["spf"]["policy"] = "strict"
                 elif "~all" in record:
-                    result["score"] += 1
+                    result["score"] += 0.5  # Stark reduzierte Punkte für softfail
                     result["spf"]["policy"] = "softfail"
                 elif "+all" in record:
                     result["score"] -= 1  # Abzug für unsichere Konfiguration
                     result["spf"]["policy"] = "dangerous"
                 else:
-                    result["score"] += 0.5  # Auch ohne Policy-Ende Punkte geben
+                    result["score"] += 0  # Keine Extrapunkte ohne Policy-Ende
                     result["spf"]["policy"] = "weak"
                 
                 # Wir nehmen den ersten gültigen SPF-Eintrag
@@ -108,9 +108,17 @@ def check_email_security(domain):
         try:
             records = check_dns_record(f"{selector}._domainkey.{domain}")
             if records:
-                dkim_records = records
-                found_selector = selector
-                break
+                # Zusätzliche Validierung, dass es ein echter DKIM-Eintrag ist
+                valid_dkim = False
+                for record in records:
+                    if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
+                        valid_dkim = True
+                        break
+                
+                if valid_dkim:
+                    dkim_records = records
+                    found_selector = selector
+                    break
         except Exception:
             continue
             
@@ -150,12 +158,11 @@ def check_email_security(domain):
         
         # Wenn kein gültiger DKIM-Eintrag, aber Records gefunden wurden
         if not has_valid_dkim:
-            result["dkim"]["status"] = True  # Trotzdem als vorhanden markieren
-            result["score"] += 1  # Aber weniger Punkte
+            result["dkim"]["status"] = False  # Als nicht vorhanden markieren
+            result["score"] -= 1  # Abzug für ungültigen DKIM
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
-        # EasyDMARC behandelt SPF anders - daher kein Punktabzug mehr für DKIM
-        # result["score"] -= 1  # Kein oder geringerer Abzug für fehlendes DKIM
+        result["score"] -= 1  # Abzug für fehlendes DKIM
 
     # DMARC prüfen - Deutlich höhere Bewertung für reject
     try:
@@ -164,7 +171,7 @@ def check_email_security(domain):
         
         if any("v=DMARC1" in r for r in dmarc_records):
             result["dmarc"]["status"] = True
-            result["score"] += 2  # Höhere Basis-Punkte für DMARC-Vorhandensein
+            result["score"] += 1  # Basispunkte für DMARC-Vorhandensein
             
             # DMARC pct Wert extrahieren
             for r in dmarc_records:
@@ -175,7 +182,7 @@ def check_email_security(domain):
                     except:
                         result["dmarc"]["pct"] = 100  # Standard, wenn nicht angegeben
             
-            # Deutlich höhere Punktzahl für reject Policy
+            # Policy-abhängige Punktzahl
             if any("p=reject" in r.lower() for r in dmarc_records):
                 if result["dmarc"]["pct"] == 100:
                     result["score"] += 5  # Sehr hohe Punktzahl für reject bei 100%
@@ -189,20 +196,37 @@ def check_email_security(domain):
                     result["score"] += 1  # Reduzierte Punktzahl für teilweises quarantine
                 result["dmarc"]["policy"] = "quarantine"
             elif any("p=none" in r.lower() for r in dmarc_records):
-                result["score"] += 0  # Kein Bonus, kein Abzug für "none" Policy
+                result["score"] -= 1  # Abzug für "none" Policy - nur Monitoring ohne Schutz
                 result["dmarc"]["policy"] = "none"
         else:
-            result["score"] -= 1  # Reduzierter Abzug für fehlendes DMARC
+            result["score"] -= 1  # Abzug für fehlendes DMARC
     except Exception as e:
         print(f"DMARC check error: {str(e)}")
         result["dmarc"]["raw"].append(f"Error: {str(e)}")
     
-    # Für EasyDMARC-Kompatibilität:
-    # Wenn SPF gefunden wird, gib Mindestpunkte von 4
-    if result["spf"]["status"] and result["score"] < 4:
-        result["score"] = 4
+    # Spezielle EasyDMARC-Kompatibilitätsanpassungen
     
-    # Maximale Punktzahl begrenzen
+    # 1. Wenn SPF mit ~all und DMARC mit p=none, max 2 Punkte (wie bei ninofischlein.de)
+    if (result["spf"]["status"] and result["spf"]["policy"] == "softfail" and 
+        result["dmarc"]["status"] and result["dmarc"]["policy"] == "none" and 
+        not result["dkim"]["status"]):
+        result["score"] = min(2, result["score"])
+    
+    # 2. Wenn alle drei konfiguriert sind, aber DMARC=none oder SPF=~all, max 4 Punkte
+    elif (result["spf"]["status"] and result["dmarc"]["status"] and result["dkim"]["status"] and
+         (result["dmarc"]["policy"] == "none" or result["spf"]["policy"] == "softfail")):
+        result["score"] = min(4, result["score"])
+    
+    # 3. Wenn SPF mit -all und DMARC=reject, mindestens 8 Punkte
+    elif (result["spf"]["status"] and result["spf"]["policy"] == "strict" and 
+          result["dmarc"]["status"] and result["dmarc"]["policy"] == "reject"):
+        result["score"] = max(8, result["score"])
+    
+    # 4. Wenn kein SPF oder kein DMARC, max 2 Punkte
+    elif not result["spf"]["status"] or not result["dmarc"]["status"]:
+        result["score"] = min(2, result["score"])
+    
+    # Maximale Punktzahl begrenzen und runden
     result["score"] = max(0, min(10, round(result["score"])))
     
     return result
