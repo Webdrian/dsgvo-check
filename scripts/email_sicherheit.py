@@ -103,7 +103,29 @@ def check_email_security(domain):
                 valid_dkim = False
                 for record in records:
                     if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
-                        valid_dkim = True
+                        if "p=" in record:
+                            try:
+                                p_value = ""
+                                if ";" in record.split("p=")[1]:
+                                    p_value = record.split("p=")[1].split(";")[0].strip('"\'')
+                                else:
+                                    p_value = record.split("p=")[1].strip('"\'')
+                                
+                                p_value = p_value.replace(" ", "")
+                                key_size = len(p_value) * 6 / 8  # Grobe Umrechnung
+                                result["dkim"]["key_size"] = key_size
+
+                                if key_size >= 384:  # Mindestgröße für glaubwürdigen DKIM Key
+                                    has_valid_dkim = True
+                                    result["dkim"]["status"] = True
+                                    result["score"] += 3
+                                    if key_size >= 1024:
+                                        result["score"] += 1
+                                else:
+                                    result["dkim"]["status"] = False
+                                    result["score"] -= 1
+                            except Exception as e:
+                                print(f"DKIM key size error: {str(e)}")
                         break
                 
                 if valid_dkim:
