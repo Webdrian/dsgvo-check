@@ -65,40 +65,21 @@ def check_email_security(domain):
             record_lower = record.lower()
             
             # Sehr flexible SPF-Erkennung
-            if ("v=spf1" in record_lower or 
-                "include:_spf" in record_lower or 
-                "spf2.0/" in record_lower or 
-                "include:spf" in record_lower or
-                "+mx" in record_lower and "~all" in record_lower):  # Häufiges Muster bei SPF
-                
-                spf_found = True
+            if "v=spf1" in record_lower:
                 result["spf"]["status"] = True
-                result["score"] += 2  # Basispunkte für SPF-Vorhandensein
-                
-                if "-all" in record:
-                    result["score"] += 2  # Höhere Punkte für strikte Policy
+                result["score"] += 2  # SPF vorhanden
+                if "-all" in record_lower:
+                    result["score"] += 2
                     result["spf"]["policy"] = "strict"
-                elif "~all" in record:
-                    result["score"] += 0.5  # Geringere Punkte für softfail
+                elif "~all" in record_lower:
+                    result["score"] += 0.5
                     result["spf"]["policy"] = "softfail"
-                elif "+all" in record:
-                    result["score"] -= 1  # Abzug für unsichere Konfiguration
+                elif "+all" in record_lower:
+                    result["score"] -= 1
                     result["spf"]["policy"] = "dangerous"
                 else:
-                    result["score"] += 0  # Keine Extrapunkte ohne Policy-Ende
                     result["spf"]["policy"] = "weak"
-                
-                # Wir nehmen den ersten gültigen SPF-Eintrag
                 break
-        
-        # Spezielle Prüfung für bekannte problematische Domains
-        if not spf_found and (domain.lower() == "specialpage.ch"):
-            # Direkte Überprüfung des SPF-Records für specialpage.ch
-            result["spf"]["status"] = True
-            result["score"] += 2.5  # Basispunkte für SPF-Vorhandensein
-            result["spf"]["policy"] = "softfail"
-            result["spf"]["raw"].append("v=spf1 include:_spf.sui-inter.net +mx +a ~all (manuell erkannt)")
-            spf_found = True
         
         if not spf_found:
             result["score"] -= 1
@@ -187,8 +168,8 @@ def check_email_security(domain):
         
         if any("v=DMARC1" in r for r in dmarc_records):
             result["dmarc"]["status"] = True
-            result["score"] += 1  # Basispunkte für DMARC-Vorhandensein
-            
+            result["score"] += 1  # DMARC vorhanden
+
             # DMARC pct Wert extrahieren
             for r in dmarc_records:
                 if "pct=" in r:
@@ -196,26 +177,19 @@ def check_email_security(domain):
                         pct = int(r.split("pct=")[1].split(";")[0].strip('"\''))
                         result["dmarc"]["pct"] = pct
                     except:
-                        result["dmarc"]["pct"] = 100  # Standard, wenn nicht angegeben
-            
-            # Policy-abhängige Punktzahl
+                        result["dmarc"]["pct"] = 100  # Default
+
             if any("p=reject" in r.lower() for r in dmarc_records):
-                if result["dmarc"]["pct"] == 100:
-                    result["score"] += 5  # Sehr hohe Punktzahl für reject bei 100%
-                else:
-                    result["score"] += 4  # Hohe Punktzahl für teilweises reject
                 result["dmarc"]["policy"] = "reject"
+                result["score"] += 5 if result["dmarc"]["pct"] == 100 else 4
             elif any("p=quarantine" in r.lower() for r in dmarc_records):
-                if result["dmarc"]["pct"] == 100:
-                    result["score"] += 2  # Mittlere Punktzahl für quarantine bei 100%
-                else:
-                    result["score"] += 1  # Reduzierte Punktzahl für teilweises quarantine
                 result["dmarc"]["policy"] = "quarantine"
+                result["score"] += 2 if result["dmarc"]["pct"] == 100 else 1
             elif any("p=none" in r.lower() for r in dmarc_records):
-                result["score"] -= 1  # Abzug für "none" Policy - nur Monitoring ohne Schutz
                 result["dmarc"]["policy"] = "none"
+                result["score"] -= 1
         else:
-            result["score"] -= 1  # Abzug für fehlendes DMARC
+            result["score"] -= 1  # Kein DMARC
     except Exception as e:
         print(f"DMARC check error: {str(e)}")
         result["dmarc"]["raw"].append(f"Error: {str(e)}")
