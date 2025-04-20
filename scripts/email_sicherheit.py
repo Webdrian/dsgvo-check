@@ -192,9 +192,10 @@ def check_email_security(domain):
         
     # Allgemeine Regelanpassungen
     
-    # 2. Wenn nur SPF und DMARC vorhanden sind (kein DKIM), max 4 Punkte
+    # 2. Wenn SPF + DMARC vorhanden, aber kein DKIM → wie EasyDMARC: 4 Punkte realistisch
     if (result["spf"]["status"] and result["dmarc"]["status"] and not result["dkim"]["status"]):
-        result["score"] = min(4, result["score"])
+        result["score"] = max(result["score"], 4)
+        result["score"] = min(result["score"], 4)
     
     # 3. Wenn SPF mit -all und DMARC=reject, mindestens 8 Punkte
     elif (result["spf"]["status"] and result["spf"]["policy"] == "strict" and 
