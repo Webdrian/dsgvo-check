@@ -270,6 +270,13 @@ def check_email_security(domain):
         result["score"] = 3
         result["scoring_reason"].append("Fallback: min. 3 Punkte bei SPF-only ohne DKIM/DMARC")
 
+    # Bewertungstext abhängig vom Score
+    if result["score"] >= 8:
+        result["rating"] = "Sehr gut geschützt"
+    elif result["score"] >= 5:
+        result["rating"] = "Gut, aber Verbesserung möglich"
+    else:
+        result["rating"] = "Kritisch – Sofort handeln"
     return result
 
 def render_email_security(email_security):
