@@ -1,4 +1,10 @@
 import dns.resolver
+from rich.console import Console
+from rich.panel import Panel
+from rich.layout import Layout
+from rich.text import Text
+from rich.align import Align
+from rich import box
 
 def check_dns_record(name):
     try:
@@ -60,6 +66,126 @@ def check_email_security(domain):
         result["score"] -= 1  # slight penalty for missing strong policy
 
     return result
+
+def visualize_email_security(email_security):
+    """
+    Erstellt eine visuelle Darstellung der E-Mail-Sicherheitsbewertung.
+    
+    Args:
+        email_security: Ergebnis der check_email_security Funktion
+    """
+    console = Console()
+    
+    # Extrahiere Werte
+    score = int(email_security.get("score", 0))
+    spf_status = email_security.get("spf", {}).get("status", False)
+    dkim_status = email_security.get("dkim", {}).get("status", False)
+    dmarc_status = email_security.get("dmarc", {}).get("status", False)
+    dmarc_policy = email_security.get("dmarc", {}).get("policy", "none")
+    
+    # Bestimme Risiko-Level
+    if score >= 8:
+        risk_level = "Low"
+        risk_color = "green"
+    elif score >= 5:
+        risk_level = "Medium"
+        risk_color = "yellow"
+    else:
+        risk_level = "High"
+        risk_color = "red"
+    
+    # Header mit Risikobewertung
+    console.print()
+    console.print(Text("Scan another domain", style="blue"), "←")
+    console.print()
+    
+    risk_title = f"Risk Assessment Level: {risk_level}"
+    if risk_level == "High":
+        risk_title = f"Risk Assessment Level: [bold red]{risk_level}[/bold red]"
+        risk_description = "A domain with a high security risk level indicates critical vulnerabilities in SPF, DKIM, and DMARC, posing a severe threat of email impersonation and phishing attacks, necessitating urgent protocol enhancements."
+    elif risk_level == "Medium":
+        risk_title = f"Risk Assessment Level: [bold yellow]{risk_level}[/bold yellow]"
+        risk_description = "This domain has some email security measures in place but may still be vulnerable to certain types of spoofing attacks. Consider strengthening the configuration."
+    else:
+        risk_title = f"Risk Assessment Level: [bold green]{risk_level}[/bold green]"
+        risk_description = "This domain has strong email security measures in place, providing good protection against email spoofing and phishing attacks."
+    
+    console.print(Panel(
+        f"{risk_title}\n\n{risk_description}",
+        border_style=risk_color,
+        box=box.ROUNDED
+    ))
+    
+    # Overall result line
+    console.print("Overall result", end="")
+    console.print("   [?]", style="dim")
+    console.print("                                                  DMARC Policy:", end="")
+    policy_style = "white on gray" if dmarc_policy == "none" or not dmarc_status else "white"
+    console.print(f"  [{policy_style}] {dmarc_policy.title() if dmarc_status else 'Missing'} [/{policy_style}]")
+    console.print()
+    
+    # Layout für Score und Protokolle
+    layout = Layout()
+    layout.split_row(
+        Layout(name="score", size=20),
+        Layout(name="protocols")
+    )
+    
+    # Score section
+    score_circle = f"""
+          Score
+          
+          [bold]{score}[/bold]
+         of 10
+    """
+    layout["score"].update(Align.center(Text(score_circle, justify="center"), vertical="middle"))
+    
+    # Protokolle section
+    layout["protocols"].split_row(
+        Layout(name="dmarc"),
+        Layout(name="spf"),
+        Layout(name="dkim")
+    )
+    
+    # Icons for status
+    dmarc_icon = "🔴" if not dmarc_status else "🟢"
+    spf_icon = "🔴" if not spf_status else "🟢"
+    dkim_icon = "🔴" if not dkim_status else "🟢"
+    
+    dmarc_text = f"""
+    {dmarc_icon} [bold]DMARC[/bold]
+    Domain-based Message
+    Authentication,
+    Reporting and
+    Conformance
+    """
+    
+    spf_text = f"""
+    {spf_icon} [bold]SPF[/bold]
+    Sender Policy
+    Framework
+    """
+    
+    dkim_text = f"""
+    {dkim_icon} [bold]DKIM[/bold]
+    DomainKeys
+    Identified Mail
+    """
+    
+    layout["dmarc"].update(Align.center(Text(dmarc_text)))
+    layout["spf"].update(Align.center(Text(spf_text)))
+    layout["dkim"].update(Align.center(Text(dkim_text)))
+    
+    console.print(layout)
+    console.print()
+    
+    # Buttons
+    console.print(Align.center(
+        Panel(" See Details ", width=20, border_style="blue", box=box.ROUNDED) + 
+        "   " + 
+        Panel(" Start DMARC Journey ", width=30, border_style="blue", box=box.ROUNDED, style="bold white on blue")
+    ))
+    console.print()
 
 def render_email_security(email_security):
     lines = []

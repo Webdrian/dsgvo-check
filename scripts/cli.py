@@ -146,31 +146,7 @@ def main():
 
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-
-    spf_raw = email_security["spf"].get("status", "")
-    spf_status = str(spf_raw).lower() in ["valid", "pass", "true"]
-    dkim_raw = email_security["dkim"].get("status", "")
-    dkim_status = str(dkim_raw).lower() in ["valid", "pass", "true"]
-    dmarc_raw = email_security["dmarc"].get("status", "")
-    dmarc_status = str(dmarc_raw).lower() in ["valid", "pass", "true"]
-    dmarc_policy = email_security["dmarc"].get("policy", "Keine Policy gefunden")
-
-    console.print("✅ SPF vorhanden" if spf_status else "❌ SPF fehlt")
-    console.print("✅ DKIM vorhanden" if dkim_status else "❌ DKIM fehlt oder falsch konfiguriert")
-    console.print(f"✅ DMARC vorhanden (Policy: {dmarc_policy})" if dmarc_status else "❌ DMARC fehlt oder falsch konfiguriert")
-    console.print()
-
-    score = int(email_security.get("score") or 0)
-    rating = email_security.get("rating", "Keine Bewertung verfügbar")
-
-    if score >= 8:
-        console.print(f"🔐 Gesamtbewertung: [bold green]{score}/10[/bold green] – [bold]{rating}[/bold]")
-    elif score >= 4:
-        console.print(f"🔐 Gesamtbewertung: [bold yellow]{score}/10[/bold yellow] – [bold]{rating}[/bold]")
-    else:
-        console.print(f"🔐 Gesamtbewertung: [bold red]{score}/10[/bold red] – [bold]{rating}[/bold]")
-
-    console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
+    visualize_email_security(raw_email_security)  # Verwende die neue visuelle Darstellung
     console.print()
 
     # Abschnitt: SSL-Zertifikat
