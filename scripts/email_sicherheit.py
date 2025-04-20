@@ -107,7 +107,8 @@ def check_email_security(domain):
                 # Zusätzliche Validierung, dass es ein echter DKIM-Eintrag ist
                 valid_dkim = False
                 for record in records:
-                    if "v=dkim1" in record.lower() or "k=rsa" in record.lower() or "p=" in record.lower():
+                    record_lower = record.lower()
+                    if "v=dkim1" in record_lower and "p=" in record_lower:
                         valid_dkim = True
                         break
                 
