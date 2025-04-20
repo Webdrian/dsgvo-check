@@ -119,6 +119,47 @@ def check_email_security(domain):
         except Exception:
             continue
             
+    if dkim_records:
+        result["dkim"]["raw"] = dkim_records
+        result["dkim"]["selector"] = found_selector
+        
+        # DKIM-Status auch ohne genaue Schlüsselgrößenprüfung akzeptieren
+        has_valid_dkim = False
+        
+        for record in dkim_records:
+            record_lower = record.lower()
+            if "v=dkim1" in record_lower or "k=rsa" in record_lower:
+                has_valid_dkim = True
+                result["dkim"]["status"] = True
+                result["score"] += 3  # Grundpunkte für DKIM
+                result["scoring_reason"].append("DKIM vorhanden (+3)")
+                
+                # DKIM-Schlüsselgröße überprüfen (falls vorhanden)
+                if "p=" in record:
+                    try:
+                        p_value = ""
+                        if ";" in record.split("p=")[1]:
+                            p_value = record.split("p=")[1].split(";")[0].strip('"\'')
+                        else:
+                            p_value = record.split("p=")[1].strip('"\'')
+                            
+                        # Behandle mehrere Teile (manchmal werden lange Keys in Teilen gespeichert)
+                        p_value = p_value.replace(" ", "")
+                        key_size = len(p_value) * 6 / 8  # Grobe Umrechnung von Base64 zu Bits
+                        result["dkim"]["key_size"] = key_size
+                        
+                        if key_size >= 1024:  # Bonus für großen Schlüssel
+                            result["score"] += 1
+                            result["scoring_reason"].append("DKIM-Schlüsselstärke ≥ 1024 Bit (+1)")
+                    except Exception as e:
+                        print(f"DKIM key size error: {str(e)}")
+                break
+        
+        # Wenn kein gültiger DKIM-Eintrag, aber Records gefunden wurden
+        if not has_valid_dkim:
+            result["dkim"]["status"] = False  # Als nicht vorhanden markieren
+            result["score"] -= 1  # Abzug für ungültigen DKIM
+            result["scoring_reason"].append("DKIM fehlt oder ungültig (-1)")
     else:
         result["dkim"]["raw"] = ["DKIM selectors not found"]
         result["score"] -= 1  # Abzug für fehlendes DKIM
