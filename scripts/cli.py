@@ -72,8 +72,8 @@ def main():
         for plugin in plugins:
             console.print(f"  • {plugin}")
     else:
-    console.print("[bold]Plugins:[/bold] Keine erkannt")
-    console.print()
+        console.print("[bold]Plugins:[/bold] Keine erkannt")
+        console.print()
     # Erweiterte Technologien
     if technologies["frameworks"]:
         console.print(f"[bold]Frameworks:[/bold] {', '.join(technologies['frameworks'])}")
