@@ -144,10 +144,43 @@ def main():
         console.print("Keine Cookies erkannt.")
     console.print()
 
+  # Ersetze in der main() Funktion den Abschnitt "E-Mail-Sicherheit" mit diesem Code:
+
     # Abschnitt: E-Mail-Sicherheit
     console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
-    visualize_email_security(raw_email_security)  # Verwende die neue visuelle Darstellung
-    console.print()
+
+    # SPF Status
+    spf_status = str(email_security["spf"].get("status", "")).lower() in ["valid", "pass", "true"]
+    if spf_status:
+        console.print("[green]✓[/green] SPF vorhanden")
+    else:
+    console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
+
+    # DKIM Status
+    dkim_status = str(email_security["dkim"].get("status", "")).lower() in ["valid", "pass", "true"]
+    if dkim_status:
+    console.print("[green]✓[/green] DKIM vorhanden")
+else:
+    console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
+
+# DMARC Status
+dmarc_status = str(email_security["dmarc"].get("status", "")).lower() in ["valid", "pass", "true"]
+dmarc_policy = email_security["dmarc"].get("policy", "none")
+if dmarc_status:
+    policy_text = f"(Policy: {dmarc_policy})"
+    console.print(f"[green]✓[/green] DMARC vorhanden {policy_text}")
+else:
+    console.print("[red]✗[/red] [red]DMARC fehlt oder falsch konfiguriert[/red]")
+
+console.print()
+
+# Gesamtbewertung
+score = int(email_security.get("score") or 0)
+rating = email_security.get("rating", "Keine Bewertung verfügbar")
+
+console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
+console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
+console.print()
 
     # Abschnitt: SSL-Zertifikat
     console.rule("[bold white]7. SSL-Zertifikat[/bold white]")

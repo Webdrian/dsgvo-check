@@ -1,10 +1,5 @@
 import dns.resolver
 from rich.console import Console
-from rich.panel import Panel
-from rich.layout import Layout
-from rich.text import Text
-from rich.align import Align
-from rich import box
 
 def check_dns_record(name):
     try:
@@ -67,14 +62,14 @@ def check_email_security(domain):
 
     return result
 
-def visualize_email_security(email_security):
+def render_email_security(email_security):
     """
-    Erstellt eine visuelle Darstellung der E-Mail-Sicherheitsbewertung.
-    
-    Args:
-        email_security: Ergebnis der check_email_security Funktion
+    Einfache Darstellung der E-Mail-Sicherheit im Format wie im Screenshot.
     """
     console = Console()
+    
+    # Header
+    console.rule("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     
     # Extrahiere Werte
     score = int(email_security.get("score", 0))
@@ -82,110 +77,44 @@ def visualize_email_security(email_security):
     dkim_status = email_security.get("dkim", {}).get("status", False)
     dmarc_status = email_security.get("dmarc", {}).get("status", False)
     dmarc_policy = email_security.get("dmarc", {}).get("policy", "none")
-    
-    # Bestimme Risiko-Level
-    if score >= 8:
-        risk_level = "Low"
-        risk_color = "green"
-    elif score >= 5:
-        risk_level = "Medium"
-        risk_color = "yellow"
-    else:
-        risk_level = "High"
-        risk_color = "red"
-    
-    # Header mit Risikobewertung
-    console.print()
-    console.print(Text("Scan another domain", style="blue"), "←")
-    console.print()
-    
-    risk_title = f"Risk Assessment Level: {risk_level}"
-    if risk_level == "High":
-        risk_title = f"Risk Assessment Level: [bold red]{risk_level}[/bold red]"
-        risk_description = "A domain with a high security risk level indicates critical vulnerabilities in SPF, DKIM, and DMARC, posing a severe threat of email impersonation and phishing attacks, necessitating urgent protocol enhancements."
-    elif risk_level == "Medium":
-        risk_title = f"Risk Assessment Level: [bold yellow]{risk_level}[/bold yellow]"
-        risk_description = "This domain has some email security measures in place but may still be vulnerable to certain types of spoofing attacks. Consider strengthening the configuration."
-    else:
-        risk_title = f"Risk Assessment Level: [bold green]{risk_level}[/bold green]"
-        risk_description = "This domain has strong email security measures in place, providing good protection against email spoofing and phishing attacks."
-    
-    console.print(Panel(
-        f"{risk_title}\n\n{risk_description}",
-        border_style=risk_color,
-        box=box.ROUNDED
-    ))
-    
-    # Overall result line
-    console.print("Overall result", end="")
-    console.print("   [?]", style="dim")
-    console.print("                                                  DMARC Policy:", end="")
-    policy_style = "white on gray" if dmarc_policy == "none" or not dmarc_status else "white"
-    console.print(f"  [{policy_style}] {dmarc_policy.title() if dmarc_status else 'Missing'} [/{policy_style}]")
-    console.print()
-    
-    # Layout für Score und Protokolle
-    layout = Layout()
-    layout.split_row(
-        Layout(name="protocols", ratio=3),  # Vergrößert für Protokolle
-        Layout(name="score", ratio=1)       # Verkleinert für Score
-    )
-    
-    # Score section
-    score_text = f"""
-          Score
-          
-          [bold]{score}[/bold]
-         of 10
-    """
-    layout["score"].update(Align.center(Text(score_text, justify="center"), vertical="middle"))
-    
-    # Protokolle section
-    layout["protocols"].split_row(
-        Layout(name="dmarc"),
-        Layout(name="spf"),
-        Layout(name="dkim")
-    )
-    
-    # Icons for status
-    dmarc_icon = "🔴" if not dmarc_status else "🟢"
-    spf_icon = "🔴" if not spf_status else "🟢"
-    dkim_icon = "🔴" if not dkim_status else "🟢"
-    
-    dmarc_text = f"""
-    {dmarc_icon} [bold]DMARC[/bold]
-    Domain-based Message
-    Authentication,
-    Reporting and
-    Conformance
-    """
-    
-    spf_text = f"""
-    {spf_icon} [bold]SPF[/bold]
-    Sender Policy
-    Framework
-    """
-    
-    dkim_text = f"""
-    {dkim_icon} [bold]DKIM[/bold]
-    DomainKeys
-    Identified Mail
-    """
-    
-    layout["dmarc"].update(Align.center(Text(dmarc_text)))
-    layout["spf"].update(Align.center(Text(spf_text)))
-    layout["dkim"].update(Align.center(Text(dkim_text)))
-    
-    console.print(layout)
-    console.print()
-    
-    # KORRIGIERT: Buttons korrekt darstellen
-    # Erstelle Buttons separat und gebe sie nacheinander aus
-    console.print(Align.center(Panel(" See Details ", width=20, border_style="blue", box=box.ROUNDED)))
-    console.print(Align.center(Panel(" Start DMARC Journey ", width=30, border_style="blue", box=box.ROUNDED, style="bold white on blue")))
-    console.print()
 
-def render_email_security(email_security):
+    # SPF Status
+    if spf_status:
+        console.print("[green]✓[/green] SPF vorhanden")
+    else:
+        console.print("[red]✗[/red] [red]SPF fehlt oder falsch konfiguriert[/red]")
+    
+    # DKIM Status
+    if dkim_status:
+        console.print("[green]✓[/green] DKIM vorhanden")
+    else:
+        console.print("[red]✗[/red] [red]DKIM fehlt oder falsch konfiguriert[/red]")
+    
+    # DMARC Status
+    if dmarc_status:
+        policy_text = f"(Policy: {dmarc_policy})"
+        console.print(f"[green]✓[/green] DMARC vorhanden {policy_text}")
+    else:
+        console.print("[red]✗[/red] [red]DMARC fehlt oder falsch konfiguriert[/red]")
+    
+    console.print()
+    
+    # Gesamtbewertung
+    rating = "Keine Bewertung verfügbar"
+    if score >= 9:
+        rating = "Sehr gut geschützt"
+    elif score >= 6:
+        rating = "Gut, aber Verbesserung möglich"
+    elif score >= 3:
+        rating = "Verbesserung dringend nötig"
+    else:
+        rating = "Kritisch – Sofort handeln"
+    
+    console.print(f"[yellow]🔐 Gesamtbewertung: {score}/10[/yellow] - {rating}")
+    console.print("[green]Diese Sicherheitsmechanismen schützen deine Domain vor Spoofing, Phishing und unautorisiertem E-Mail-Versand.[/green]")
+
+# Diese Funktion ist für die Rückwärtskompatibilität und eignet sich eher für programmatische Nutzung
+def render_email_security_lines(email_security):
     lines = []
     lines.append("[bold blue]6. E-Mail-Sicherheit[/bold blue]")
     lines.append("")
