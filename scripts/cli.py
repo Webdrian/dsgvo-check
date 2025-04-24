@@ -162,6 +162,10 @@ def main():
 
     if cookie_analysis['suspicious_cookies']:
         console.print(f"[red]⚠️ Verdächtige Cookies gefunden:[/red] {', '.join(cookie_analysis['suspicious_cookies'])}")
+    if cookie_analysis['critical_before_consent']:
+        console.print(f"[red]🚨 Kritische Cookies vor Einwilligung geladen:[/red] {', '.join(cookie_analysis['critical_before_consent'])}")
+    else:
+        console.print("[green]✅ Keine kritischen Cookies vor Zustimmung geladen")
     console.print()
 
     # Abschnitt: E-Mail-Sicherheit innerhalb der main()-Funktion

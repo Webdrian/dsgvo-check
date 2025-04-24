@@ -21,7 +21,8 @@ def analyze_cookies(url):
             "cookies_before": [],
             "cookies_after": [],
             "suspicious_cookies": [],
-            "tools_detected": []
+            "tools_detected": [],
+            "critical_before_consent": []
         }
 
     def find_cookie_info(name):
@@ -78,7 +79,8 @@ def analyze_cookies(url):
             "cookies_before": [],
             "cookies_after": [],
             "suspicious_cookies": [],
-            "tools_detected": []
+            "tools_detected": [],
+            "critical_before_consent": []
         }
 
     # Verdächtige Cookies analysieren
@@ -94,13 +96,24 @@ def analyze_cookies(url):
         and find_cookie_info(c.get("name", "")).get("tool")
     ))
 
+    critical_before_consent = []
+
+    for c in cookies_before:
+        info = find_cookie_info(c.get("name", ""))
+        if info and info["category"] in ["Analyse", "Marketing"]:
+            critical_before_consent.append(c.get("name", ""))
+
+    # Entferne Duplikate
+    critical_before_consent = list(set(critical_before_consent))
+
     return {
         "consent_found": consent_found,
         "detected_consent_tool": detected_consent_tool,
         "cookies_before": cookies_before,
         "cookies_after": cookies_after,
         "suspicious_cookies": suspicious,
-        "tools_detected": tools_detected
+        "tools_detected": tools_detected,
+        "critical_before_consent": critical_before_consent
     }
 
 def load_cookie_db():
