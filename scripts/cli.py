@@ -230,14 +230,14 @@ def main():
     console.rule("[bold white]8. Rechtliche Seiten[/bold white]")
 
     if legal_pages["impressum"]:
-        console.print("✅ Impressum gefunden")
+        console.print("✅ [bold]Impressum vorhanden[/bold]")
     else:
-        console.print("❌ Kein Impressum gefunden")
+        console.print("⚠️ [yellow]Impressum fehlt – rechtlich erforderlich![/yellow]")
 
     if legal_pages["datenschutz"]:
-        console.print("✅ Datenschutzerklärung gefunden")
+        console.print("✅ [bold]Datenschutzerklärung vorhanden[/bold]")
     else:
-        console.print("❌ Keine Datenschutzerklärung gefunden")
+        console.print("⚠️ [yellow]Datenschutzerklärung fehlt – bitte ergänzen![/yellow]")
 
     console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
 
