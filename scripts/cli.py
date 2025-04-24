@@ -22,6 +22,7 @@ def main():
     cms_list, builder_list = detect_cms(html)
     theme = detect_wordpress_theme(html)
     plugins = detect_plugins(html)
+    technologies = detect_technologies(html)
     ssl_info = get_ssl_info(domain)
     cookies_before, cookies_after, suspicious, tools_detected = analyze_cookies(url)
     cookie_db = load_cookie_db()
