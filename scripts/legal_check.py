@@ -6,17 +6,23 @@ def check_legal_pages(html):
 
     impressum_found = False
     datenschutz_found = False
+    impressum_link = ""
+    datenschutz_link = ""
 
     for link in links:
         href = link["href"].lower()
         text = link.get_text(strip=True).lower()
 
-        if any(term in href or term in text for term in ["impressum", "legal", "contact", "kontakt"]):
+        if not impressum_found and any(term in href or term in text for term in ["impressum", "legal", "contact", "kontakt"]):
             impressum_found = True
-        if any(term in href or term in text for term in ["datenschutz", "privacy", "data-protection"]):
+            impressum_link = href
+        if not datenschutz_found and any(term in href or term in text for term in ["datenschutz", "privacy", "data-protection"]):
             datenschutz_found = True
+            datenschutz_link = href
 
     return {
         "impressum": impressum_found,
-        "datenschutz": datenschutz_found
+        "datenschutz": datenschutz_found,
+        "impressum_link": impressum_link,
+        "datenschutz_link": datenschutz_link
     }
