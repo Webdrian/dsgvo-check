@@ -61,13 +61,7 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
             "emoji": "⚠️"
         })
     else:
-        matched_risks.append({
-            "name": "Keine externen Fonts gefunden",
-            "category": "Externe Schriften",
-            "risk": "keine",
-            "note": "Alle Fonts werden lokal geladen – DSGVO-konform.",
-            "emoji": "✅"
-        })
+        pass  # Keine Aktion notwendig, da DSGVO-konform
 
     return {
         "critical_violations": pre_consent_violations,
