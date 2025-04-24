@@ -1,167 +1,208 @@
-[
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2024-04-25"
+  },
+  "tools": [
     {
       "name": "Google Analytics",
       "category": "Tracking",
       "match": ["gtag/js", "analytics.js", "google-analytics.com"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": true
     },
     {
       "name": "Google Tag Manager",
       "category": "Tag Management",
       "match": ["googletagmanager.com", "gtm.js"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "Google Fonts",
       "category": "Externe Schriftarten",
       "match": ["fonts.googleapis.com", "fonts.gstatic.com"],
-      "risk": "mittel"
+      "risk": "mittel",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "Vimeo",
       "category": "Externe Medien",
       "match": ["vimeo.com/player", "vimeo.com"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": true
     },
     {
       "name": "YouTube",
       "category": "Externe Medien",
       "match": ["youtube.com", "ytimg.com"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": true
     },
     {
       "name": "Facebook Pixel",
       "category": "Tracking",
       "match": ["facebook.net", "fbevents.js"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": true
     },
     {
       "name": "Cookiebot",
       "category": "Cookie Consent",
       "match": ["consent.cookiebot.com", "cookiebot"],
-      "risk": "niedrig"
+      "risk": "niedrig",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "ActiveCampaign",
       "category": "Marketing Automation",
       "match": ["activecampaign.com", "trackcmp.net"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "HubSpot",
       "category": "CRM & Marketing",
       "match": ["hs-scripts.com", "hs-analytics.net"],
-      "risk": "hoch"
+      "risk": "hoch",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "Cloudflare",
       "category": "CDN / Sicherheit",
       "match": ["cloudflare.com", "cf-ns.com"],
-      "risk": "niedrig"
+      "risk": "niedrig",
+      "note": "Keine besonderen Hinweise.",
+      "consent_required": false
     },
     {
       "name": "Hotjar",
       "category": "Tracking / UX",
       "match": ["hotjar.com", "hotjar-script", "hotjar.js"],
       "risk": "hoch",
-      "note": "Setzt Cookies und zeichnet Nutzerverhalten auf – Einwilligung zwingend erforderlich."
+      "note": "Setzt Cookies und zeichnet Nutzerverhalten auf – Einwilligung zwingend erforderlich.",
+      "consent_required": true
     },
     {
       "name": "LinkedIn Insight Tag",
       "category": "Marketing",
       "match": ["linkedin.com/insight", "li.ads", "linkedin.net"],
       "risk": "hoch",
-      "note": "Erfasst Nutzerverhalten über mehrere Seiten hinweg – erfordert vorherige Zustimmung."
+      "note": "Erfasst Nutzerverhalten über mehrere Seiten hinweg – erfordert vorherige Zustimmung.",
+      "consent_required": true
     },
     {
       "name": "Microsoft Clarity",
       "category": "Tracking / UX",
       "match": ["clarity.ms", "clarity.js"],
       "risk": "hoch",
-      "note": "Nutzertracking durch Session-Replays und Heatmaps – nur mit Consent erlaubt."
+      "note": "Nutzertracking durch Session-Replays und Heatmaps – nur mit Consent erlaubt.",
+      "consent_required": true
     },
     {
       "name": "Google Optimize",
       "category": "A/B Testing",
       "match": ["optimize.google.com", "optimize.js"],
       "risk": "hoch",
-      "note": "Bindet sich meist direkt an Google Analytics – benötigt ebenfalls Einwilligung."
+      "note": "Bindet sich meist direkt an Google Analytics – benötigt ebenfalls Einwilligung.",
+      "consent_required": false
     },
     {
       "name": "Quantcast",
       "category": "Tracking / Targeting",
       "match": ["quantserve.com", "quantcast.mgr.consensu.org"],
       "risk": "hoch",
-      "note": "Zählt zu den aggressivsten Werbetrackern – DSGVO-relevant."
+      "note": "Zählt zu den aggressivsten Werbetrackern – DSGVO-relevant.",
+      "consent_required": false
     },
     {
       "name": "Crazy Egg",
       "category": "UX Analyse",
       "match": ["crazyegg.com", "crazyegg.js"],
       "risk": "hoch",
-      "note": "Heatmaps und Mausverfolgung – benötigt vorherige Zustimmung."
+      "note": "Heatmaps und Mausverfolgung – benötigt vorherige Zustimmung.",
+      "consent_required": true
     },
     {
       "name": "Salesforce Marketing Cloud",
       "category": "Marketing Automation",
       "match": ["exacttarget.com", "sfdc"],
       "risk": "hoch",
-      "note": "Stark personenbezogenes Tracking – nur mit Consent erlaubt."
+      "note": "Stark personenbezogenes Tracking – nur mit Consent erlaubt.",
+      "consent_required": false
     },
     {
       "name": "TikTok Pixel",
       "category": "Tracking / Marketing",
       "match": ["tiktok.com", "tiktokpixel.js"],
       "risk": "hoch",
-      "note": "Cross-Site-Nutzerverfolgung – nur mit ausdrücklicher Zustimmung erlaubt."
+      "note": "Cross-Site-Nutzerverfolgung – nur mit ausdrücklicher Zustimmung erlaubt.",
+      "consent_required": false
     },
     {
       "name": "Matomo",
       "category": "Tracking",
       "match": ["matomo.js", "piwik.js", "matomo.php", "piwik.php"],
       "risk": "mittel",
-      "note": "Kann datenschutzkonform sein, wenn korrekt konfiguriert (z. B. ohne Cookies, mit IP-Anonymisierung)"
+      "note": "Kann datenschutzkonform sein, wenn korrekt konfiguriert (z. B. ohne Cookies, mit IP-Anonymisierung)",
+      "consent_required": true
     },
     {
       "name": "Google reCAPTCHA",
       "category": "Sicherheitsdienst / Drittanbieter",
       "match": ["www.google.com/recaptcha", "gstatic.com/recaptcha"],
       "risk": "hoch",
-      "note": "Verbindung zu Google-Servern – personenbezogene Daten werden übertragen, z. T. in Drittländer."
+      "note": "Verbindung zu Google-Servern – personenbezogene Daten werden übertragen, z. T. in Drittländer.",
+      "consent_required": false
     },
     {
       "name": "Google Maps",
       "category": "Externe Medien / Karten",
       "match": ["maps.googleapis.com", "maps.gstatic.com", "maps.google.com"],
       "risk": "hoch",
-      "note": "Bindet Google-Server ein – personenbezogene Daten wie IP-Adresse werden an Google übermittelt."
+      "note": "Bindet Google-Server ein – personenbezogene Daten wie IP-Adresse werden an Google übermittelt.",
+      "consent_required": true
     },
     {
       "name": "Typeform",
       "category": "Formular / Interaktion",
       "match": ["typeform.com", "embed.typeform.com"],
       "risk": "hoch",
-      "note": "Formulare übertragen personenbezogene Daten an externe Server – Consent erforderlich."
+      "note": "Formulare übertragen personenbezogene Daten an externe Server – Consent erforderlich.",
+      "consent_required": true
     },
     {
       "name": "Calendly",
       "category": "Terminvereinbarung",
       "match": ["calendly.com", "assets.calendly.com"],
       "risk": "hoch",
-      "note": "Einbindung über iframe – personenbezogene Daten werden an Dritte weitergegeben."
+      "note": "Einbindung über iframe – personenbezogene Daten werden an Dritte weitergegeben.",
+      "consent_required": false
     },
     {
       "name": "Zapier",
       "category": "Automatisierung / Webhooks",
       "match": ["zapier.com", "hooks.zapier.com"],
       "risk": "hoch",
-      "note": "Webhooks können personenbezogene Daten an Drittanbieter übertragen – nur mit Einwilligung erlaubt."
+      "note": "Webhooks können personenbezogene Daten an Drittanbieter übertragen – nur mit Einwilligung erlaubt.",
+      "consent_required": false
     },
     {
       "name": "Intercom",
       "category": "Chat / Support",
       "match": ["intercom.io", "widget.intercom.io", "intercomcdn.com"],
       "risk": "hoch",
-      "note": "Chatfenster trackt Nutzeraktivität – personenbezogene Daten können in Drittländer übertragen werden."
+      "note": "Chatfenster trackt Nutzeraktivität – personenbezogene Daten können in Drittländer übertragen werden.",
+      "consent_required": true
     }
-]
+  ]
+}
