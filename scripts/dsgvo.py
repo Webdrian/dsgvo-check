@@ -49,6 +49,26 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
     if "google-analytics.com" in url.lower():
         other_risks.append("Google Analytics URL direkt aufgerufen")
 
+    # Google Fonts Prüfung
+    google_fonts_detected = any("fonts.googleapis.com" in r or "fonts.gstatic.com" in r for r in network_requests)
+
+    if google_fonts_detected:
+        matched_risks.append({
+            "name": "Google Fonts",
+            "category": "Externe Schriften",
+            "risk": "hoch",
+            "note": "Google Fonts extern eingebunden – Empfehlung: Lokal hosten.",
+            "emoji": "⚠️"
+        })
+    else:
+        matched_risks.append({
+            "name": "Keine externen Fonts gefunden",
+            "category": "Externe Schriften",
+            "risk": "keine",
+            "note": "Alle Fonts werden lokal geladen – DSGVO-konform.",
+            "emoji": "✅"
+        })
+
     return {
         "critical_violations": pre_consent_violations,
         "external_services": external_services,
