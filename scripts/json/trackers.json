@@ -19,5 +19,17 @@
   { "name": "Typeform", "match": ["embed.typeform.com"] },
   { "name": "Calendly", "match": ["assets.calendly.com"] },
   { "name": "Stripe", "match": ["js.stripe.com"] },
-  { "name": "Intercom", "match": ["widget.intercom.io"] }
+  { "name": "Intercom", "match": ["widget.intercom.io"] },
+  { "name": "Cookiebot", "match": ["consent.cookiebot.com"] },
+  { "name": "Usercentrics", "match": ["app.usercentrics.eu"] },
+  { "name": "Consentmanager", "match": ["consentmanager.net"] },
+  { "name": "AdRoll", "match": ["adroll.com"] },
+  { "name": "Criteo", "match": ["criteo.com"] },
+  { "name": "Outbrain", "match": ["outbrain.com"] },
+  { "name": "Taboola", "match": ["taboola.com"] },
+  { "name": "Zendesk", "match": ["zendesk.com", "zdassets.com"] },
+  { "name": "Google Maps", "match": ["maps.googleapis.com", "maps.gstatic.com"] },
+  { "name": "Trustpilot", "match": ["widget.trustpilot.com"] },
+  { "name": "ProvenExpert", "match": ["provenexpert.com"] },
+  { "name": "Cloudflare Insights", "match": ["static.cloudflareinsights.com"] }
 ]
