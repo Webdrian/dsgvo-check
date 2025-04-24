@@ -80,9 +80,8 @@ def main():
 
     # Plugins
     if plugins:
-        console.print("[bold]Plugins:[/bold]")
-        for plugin in plugins:
-            console.print(f"  • {plugin}")
+        plugin_list = ", ".join(plugins)
+        console.print(f"[bold]Plugins:[/bold] {plugin_list}")
     else:
         console.print("[bold]Plugins:[/bold] Keine erkannt")
     console.print()
