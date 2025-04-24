@@ -69,14 +69,14 @@ def main():
     cms_display = ", ".join(cms_list) if cms_list else "Nicht erkannt"
     console.print(f"[bold]CMS:[/bold] {cms_display}")
 
+    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
+
     # Pagebuilder / Shop zusammenfassen
     builder_display = ", ".join(builder_list) if builder_list else ""
     shop_display = ", ".join(technologies["shop"]) if technologies["shop"] else ""
 
     combined_builder_shop = ", ".join(filter(None, [builder_display, shop_display])) or "Nicht erkannt"
-    console.print(f"[bold]Pagebuilder / Shop:[/bold] {combined_builder_shop}")
-
-    console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
+    console.print(f"[bold]Pagebuilder:[/bold] {combined_builder_shop}")
 
     # Plugins
     if plugins:
