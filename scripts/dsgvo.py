@@ -17,13 +17,13 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
         matched = any(pattern.lower() in r.lower() for pattern in entry["match"] for r in network_requests)
         pre_consent = any(pattern.lower() in r.lower() for pattern in entry["match"] for r in pre_consent_requests)
 
-        if matched:
+        if matched and not (pre_consent and entry.get("consent_required", False)):
             matched_risks.append({
                 "name": entry["name"],
                 "category": entry["category"],
                 "risk": entry["risk"],
                 "note": entry.get("note", "Keine besonderen Hinweise."),
-                "emoji": "🚨" if pre_consent and entry.get("consent_required", False) else "⚠️"
+                "emoji": "⚠️"
             })
 
         if pre_consent and entry.get("consent_required", False):
@@ -39,4 +39,8 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
     if "google-analytics.com" in url.lower():
         other_risks.append("Google Analytics URL direkt aufgerufen")
 
-    return matched_risks, pre_consent_violations, other_risks
+    return {
+        "critical_violations": pre_consent_violations,
+        "general_risks": matched_risks,
+        "other_notes": other_risks
+    }

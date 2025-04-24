@@ -52,7 +52,10 @@ def main():
         "rating": raw_email_security.get("rating", "Keine Bewertung verfügbar"),
     }
 
-    risks, violations, indicators = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
+    risk_result = evaluate_risks(url, network_requests, pre_consent_requests, "scripts/json/riskmap.json")
+    critical = risk_result["critical_violations"]
+    general = risk_result["general_risks"]
+    indicators = risk_result["other_notes"]
 
     # Abschnitt: Allgemeine Informationen
     console.rule("[bold green]1. Allgemeine Informationen[/bold green]")
@@ -119,36 +122,27 @@ def main():
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
-    total_issues = len(risks) + len(violations) + len(indicators)
 
-    if risks:
-        console.print("[yellow]⚠️ Risiken laut RiskMap:[/yellow]")
-        for r in risks:
-            console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
-
-    console.print()
-    if violations:
-        console.print("[red]🚨 Vor Einwilligung geladen:[/red]")
-        for v in violations:
+    if critical:
+        console.print("[red]🚨 Kritische DSGVO-Verstöße:[/red]")
+        for v in critical:
             console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
+        console.print()
 
-    if total_issues == 0:
+    if general:
+        console.print("[yellow]⚠️ Optimierungspotenzial:[/yellow]")
+        for r in general:
+            console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
         console.print()
-        console.print("🟢 [bold green]DSGVO-Ampel: Keine Probleme erkannt[/bold green]")
-    elif total_issues <= 2:
-        console.print()
-        console.print(f"🟡 [bold yellow]DSGVO-Ampel: {total_issues} kleinere Probleme erkannt[/bold yellow]")
-    else:
-        console.print()
-        console.print(f"🔴 [bold red]DSGVO-Ampel: {total_issues} Risiken erkannt – bitte prüfen[/bold red]")
-    console.print()
 
     if indicators:
         console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
         for i in indicators:
             console.print(f"  ❌ {i}")
-    if not any([risks, violations, indicators]):
-        console.print("[green]Keine DSGVO-Probleme erkannt.[/green]")
+        console.print()
+
+    if not any([critical, general, indicators]):
+        console.print("[green]🟢 DSGVO-Ampel: Keine Probleme erkannt[/green]")
 
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
