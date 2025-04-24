@@ -24,7 +24,7 @@ def main():
     plugins = detect_plugins(html)
     technologies = detect_technologies(html)
     ssl_info = get_ssl_info(domain)
-    cookies_before, cookies_after, suspicious, tools_detected = analyze_cookies(url)
+    cookie_analysis = analyze_cookies(url)
     cookie_db = load_cookie_db()
     raw_email_security = check_email_security(domain)
     if isinstance(raw_email_security, list):
@@ -146,18 +146,22 @@ def main():
 
     # Abschnitt: Cookies
     console.rule("[bold yellow]5. Cookies[/bold yellow]")
-    if cookie_tool:
-        console.print(f"[bold]Erkanntes Cookie-Tool:[/bold] {cookie_tool}")
-    if cookie_banner:
-        console.print("[green]✅ Cookie-Banner erkannt[/green]")
+    if cookie_analysis["detected_consent_tool"]:
+        console.print(f"[bold]Erkanntes Consent-Tool:[/bold] {cookie_analysis['detected_consent_tool']}")
+
+    if cookie_analysis["consent_found"]:
+        console.print("[green]✅ Consent-Banner erkannt[/green]")
     else:
-        console.print("[red]❌ Kein Cookie-Banner erkannt[/red]")
+        console.print("[red]❌ Kein Consent-Banner erkannt[/red]")
 
-    console.print(f"[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookies_before)}")
-    console.print(f"[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookies_after)}")
+    console.print(f"[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookie_analysis['cookies_before'])}")
+    console.print(f"[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookie_analysis['cookies_after'])}")
 
-    if not cookies_before and not cookies_after:
+    if not cookie_analysis['cookies_before'] and not cookie_analysis['cookies_after']:
         console.print("Keine Cookies erkannt.")
+
+    if cookie_analysis['suspicious_cookies']:
+        console.print(f"[red]⚠️ Verdächtige Cookies gefunden:[/red] {', '.join(cookie_analysis['suspicious_cookies'])}")
     console.print()
 
     # Abschnitt: E-Mail-Sicherheit innerhalb der main()-Funktion
