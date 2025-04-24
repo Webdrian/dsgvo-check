@@ -62,10 +62,31 @@ def main():
 
     # Abschnitt: Software
     console.rule("[bold cyan]2. Software[/bold cyan]")
-    console.print(f"[bold]CMS:[/bold] {', '.join(cms_list) if cms_list else 'Nicht erkannt'}")
+    # CMS + Hosting
+    cms_display = ", ".join(cms_list) if cms_list else "Nicht erkannt"
+    hosting_display = ", ".join(technologies["hosting"]) if technologies["hosting"] else "Nicht erkannt"
+    console.print(f"[bold]CMS:[/bold] {cms_display} ({hosting_display})")
+
+    # Shopsystem
+    if technologies["shop"]:
+        console.print(f"[bold]Shopsystem:[/bold] {', '.join(technologies['shop'])}")
+    else:
+        console.print("[bold]Shopsystem:[/bold] Nicht erkannt")
+
+    # Page-Builder & Theme
     console.print(f"[bold]Page-Builder:[/bold] {', '.join(builder_list) if builder_list else 'Nicht erkannt'}")
     console.print(f"[bold]Theme:[/bold] {theme or 'Nicht erkannt'}")
-    console.print()
+
+    # Frameworks
+    if technologies["frameworks"]:
+        console.print(f"[bold]Frameworks:[/bold] {', '.join(technologies['frameworks'])}")
+    else:
+        console.print("[bold]Frameworks:[/bold] Nicht erkannt")
+
+    # HTTP-Header Hinweis (Platzhalter)
+    console.print("[bold]HTTP-Header:[/bold] (noch nicht implementiert)")
+
+    # Plugins
     if plugins:
         console.print("[bold]Plugins:[/bold]")
         for plugin in plugins:
