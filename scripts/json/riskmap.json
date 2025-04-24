@@ -24,8 +24,8 @@
       "name": "Google Fonts",
       "category": "Externe Schriftarten",
       "match": ["fonts.googleapis.com", "fonts.gstatic.com"],
-      "risk": "mittel",
-      "note": "Keine besonderen Hinweise.",
+      "risk": "hoch",
+      "note": "Externe Einbindung von Google Fonts ist laut Rechtsprechung ein DSGVO-Verstoß, wenn keine Einwilligung vorliegt. Empfehlung: Google Fonts lokal hosten.",
       "consent_required": false
     },
     {
