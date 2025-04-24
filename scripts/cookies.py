@@ -12,7 +12,8 @@ def analyze_cookies(url):
 
     try:
         with open("scripts/json/cookies.json", "r", encoding="utf-8") as f:
-            cookie_db = json.load(f)
+            cookie_data = json.load(f)
+            cookie_db = cookie_data.get("cookies", [])
     except Exception as e:
         console.print(f"[bold red]Fehler beim Laden von cookies.json:[/bold red] {e}")
         return {
@@ -123,7 +124,8 @@ def analyze_cookies(url):
 def load_cookie_db():
     try:
         with open("scripts/json/cookies.json", "r", encoding="utf-8") as f:
-            return json.load(f)
+            cookie_data = json.load(f)
+            return cookie_data.get("cookies", [])
     except Exception as e:
         from rich.console import Console
         console = Console()
