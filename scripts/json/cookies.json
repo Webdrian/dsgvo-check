@@ -1,68 +1,113 @@
-[
-  {
-    "name": "_ga",
-    "tool": "Google Analytics",
-    "category": "Analyse",
-    "risk": "hoch"
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2024-04-25"
   },
-  {
-    "name": "_gid",
-    "tool": "Google Analytics",
-    "category": "Analyse",
-    "risk": "hoch"
-  },
-  {
-    "name": "_gat",
-    "tool": "Google Analytics",
-    "category": "Analyse",
-    "risk": "hoch"
-  },
-  {
-    "name": "_fbp",
-    "tool": "Facebook Pixel",
-    "category": "Marketing",
-    "risk": "hoch"
-  },
-  {
-    "name": "hubspotutk",
-    "tool": "HubSpot",
-    "category": "Marketing",
-    "risk": "hoch"
-  },
-  {
-    "name": "matomo",
-    "tool": "Matomo",
-    "category": "Analyse",
-    "risk": "mittel"
-  },
-  {
-    "name": "piwik",
-    "tool": "Matomo (alt)",
-    "category": "Analyse",
-    "risk": "mittel"
-  },
-  {
-    "name": "ajs_user_id",
-    "tool": "Segment",
-    "category": "Marketing",
-    "risk": "hoch"
-  },
-  {
-    "name": "ajs_anonymous_id",
-    "tool": "Segment",
-    "category": "Marketing",
-    "risk": "hoch"
-  },
-  {
-    "name": "cookie_consent",
-    "tool": "Cookie Consent",
-    "category": "Technisch notwendig",
-    "risk": "niedrig"
-  },
-  {
-    "name": "PHPSESSID",
-    "tool": "PHP Session",
-    "category": "Technisch notwendig",
-    "risk": "niedrig"
-  }
-]
+  "cookies": [
+    {
+      "name": "_ga",
+      "tool": "Google Analytics",
+      "category": "Analyse",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "_gid",
+      "tool": "Google Analytics",
+      "category": "Analyse",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "_gat",
+      "tool": "Google Analytics",
+      "category": "Analyse",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "_fbp",
+      "tool": "Facebook Pixel",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "hubspotutk",
+      "tool": "HubSpot",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "matomo",
+      "tool": "Matomo",
+      "category": "Analyse",
+      "risk": "mittel",
+      "note": ""
+    },
+    {
+      "name": "piwik",
+      "tool": "Matomo (alt)",
+      "category": "Analyse",
+      "risk": "mittel",
+      "note": ""
+    },
+    {
+      "name": "ajs_user_id",
+      "tool": "Segment",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "ajs_anonymous_id",
+      "tool": "Segment",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": ""
+    },
+    {
+      "name": "cookie_consent",
+      "tool": "Cookie Consent",
+      "category": "Technisch notwendig",
+      "risk": "niedrig",
+      "note": ""
+    },
+    {
+      "name": "PHPSESSID",
+      "tool": "PHP Session",
+      "category": "Technisch notwendig",
+      "risk": "niedrig",
+      "note": ""
+    },
+    {
+      "name": "_ga_*",
+      "tool": "Google Analytics 4",
+      "category": "Analyse",
+      "risk": "hoch",
+      "note": "Dynamischer GA4 Cookie, wird für Nutzer-Tracking verwendet."
+    },
+    {
+      "name": "_gcl_au",
+      "tool": "Google Ads",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": "Wird zur Conversion-Tracking verwendet."
+    },
+    {
+      "name": "_ttp",
+      "tool": "TikTok Pixel",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": "Verfolgt Nutzerinteraktionen für TikTok Ads."
+    },
+    {
+      "name": "li_gc",
+      "tool": "LinkedIn Insight Tag",
+      "category": "Marketing",
+      "risk": "hoch",
+      "note": "Speichert Einwilligungen für LinkedIn Tracking."
+    }
+  ]
+}
