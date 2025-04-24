@@ -122,6 +122,8 @@ def main():
 
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
+    console.print("[italic]Hinweis: Externe Dienste und Tracker sollten erst nach Zustimmung geladen werden, um DSGVO-konform zu sein.[/italic]")
+    console.print()
 
     # Kritische Verstöße (z.B. externe Dienste ohne Consent)
     if critical:
@@ -153,7 +155,7 @@ def main():
         console.print()
 
     # Keine Probleme erkannt
-    if not any([critical, general, indicators]):
+    if not any([critical, general, indicators, external_services]):
         console.print("[green]🟢 DSGVO-Ampel: Keine Probleme erkannt[/green]")
 
     # Abschnitt: Cookies
@@ -234,6 +236,7 @@ def main():
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
         console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+    console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
 
 if __name__ == "__main__":
     main()
