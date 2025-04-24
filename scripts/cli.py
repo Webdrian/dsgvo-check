@@ -123,9 +123,9 @@ def main():
 
     # Google Fonts Check (optische Abgrenzung)
     if risk_result.get("google_fonts_external"):
-        console.print("🖋️ [yellow]Google Fonts:[/yellow] Extern eingebunden (Risiko: hoch) — Empfehlung: Lokal hosten")
+        console.print("🖋️ [yellow]Google Fonts:[/yellow] Extern eingebunden (Risiko: hoch) — Empfehlung: Lokal hosten ⚠️")
     else:
-        console.print("🖋️ [green]Google Fonts:[/green] Keine externen Fonts gefunden — DSGVO-konform")
+        console.print("🖋️ [green]Google Fonts:[/green] Keine externen Fonts gefunden — DSGVO-konform ✅")
     console.print()  # Leerzeile für bessere Lesbarkeit
 
     # Optimierungspotenzial (Tools, die datenschutzfreundlicher konfiguriert werden können)
