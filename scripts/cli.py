@@ -123,24 +123,28 @@ def main():
     # Abschnitt: DSGVO-Check
     console.rule("[bold red]4. DSGVO-Check[/bold red]")
 
+    # Kritische Verstöße (z.B. externe Dienste ohne Consent)
     if critical:
         console.print("[red]🚨 Kritische DSGVO-Verstöße:[/red]")
         for v in critical:
             console.print(f"  🚨 {v['name']} → {v['category']} (Risiko: {v['risk']})")
         console.print()
 
+    # Optimierungspotenzial (Tools, die datenschutzfreundlicher konfiguriert werden können)
     if general:
         console.print("[yellow]⚠️ Optimierungspotenzial:[/yellow]")
         for r in general:
             console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
         console.print()
 
+    # Weitere Hinweise (falls vorhanden)
     if indicators:
-        console.print("[red]❌ Weitere Auffälligkeiten:[/red]")
+        console.print("[blue]ℹ️ Hinweise:[/blue]")
         for i in indicators:
-            console.print(f"  ❌ {i}")
+            console.print(f"  ℹ️ {i}")
         console.print()
 
+    # Keine Probleme erkannt
     if not any([critical, general, indicators]):
         console.print("[green]🟢 DSGVO-Ampel: Keine Probleme erkannt[/green]")
 
