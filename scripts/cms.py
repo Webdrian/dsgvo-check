@@ -1,3 +1,5 @@
+import json
+import os
 from bs4 import BeautifulSoup
 
 def detect_wordpress_theme(html):
@@ -42,19 +44,30 @@ def detect_cms(html):
 
     return sorted(set(cms_found)), sorted(set(builders_found))
 
+
+def load_dsgvo_plugins():
+    path = os.path.join(os.path.dirname(__file__), "json/dsgvo_plugins.json")
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("plugins", [])
+
 def detect_plugins(html):
     soup = BeautifulSoup(html, "html.parser")
     plugins = []
-    for tag in soup.find_all("link", href=True):
-        if "/wp-content/plugins/" in tag["href"]:
+    dsgvo_plugins = load_dsgvo_plugins()
+
+    for tag in soup.find_all(["link", "script"], href=True):
+        if "/wp-content/plugins/" in tag.get("href", ""):
             plugin = tag["href"].split("/wp-content/plugins/")[1].split("/")[0]
-            if plugin not in plugins:
+            if plugin in dsgvo_plugins and plugin not in plugins:
                 plugins.append(plugin)
-    for tag in soup.find_all("script", src=True):
-        if "/wp-content/plugins/" in tag["src"]:
+
+    for tag in soup.find_all(["link", "script"], src=True):
+        if "/wp-content/plugins/" in tag.get("src", ""):
             plugin = tag["src"].split("/wp-content/plugins/")[1].split("/")[0]
-            if plugin not in plugins:
+            if plugin in dsgvo_plugins and plugin not in plugins:
                 plugins.append(plugin)
+
     return plugins
 
 

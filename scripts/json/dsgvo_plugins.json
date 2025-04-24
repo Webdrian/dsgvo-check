@@ -1,0 +1,14 @@
+{
+    "plugins": [
+      "borlabs-cookie",
+      "complianz",
+      "pixel-your-site",
+      "google-tag-manager-for-wordpress",
+      "wpforms",
+      "contact-form-7",
+      "matomo",
+      "woocommerce-google-analytics-integration",
+      "cookie-notice",
+      "google-analytics-dashboard-for-wp"
+    ]
+  }
