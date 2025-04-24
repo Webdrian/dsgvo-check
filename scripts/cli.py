@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from rich.console import Console
 from rich.table import Table
 import json
+from legal_check import check_legal_pages
 
 # Definieren der Console Instanz
 console = Console()
@@ -18,6 +19,7 @@ def main():
 
     # Abruf der HTML-Daten, Cookies, etc.
     html, network_requests, pre_consent_requests, cookie_tool, cookie_banner = fetch_html_and_requests(url)
+    legal_pages = check_legal_pages(html)
     title, desc = extract_meta(html)
     cms_list, builder_list = detect_cms(html)
     theme = detect_wordpress_theme(html)
@@ -223,6 +225,20 @@ def main():
         console.print(f"SHA-256: {ssl_info['sha256']}")
     else:
         console.print(f"[red]SSL-Zertifikat konnte nicht abgerufen werden.[/red]")
+
+    # Abschnitt: Rechtliche Seiten
+    console.rule("[bold white]8. Rechtliche Seiten[/bold white]")
+
+    if legal_pages["impressum"]:
+        console.print("✅ Impressum gefunden")
+    else:
+        console.print("❌ Kein Impressum gefunden")
+
+    if legal_pages["datenschutz"]:
+        console.print("✅ Datenschutzerklärung gefunden")
+    else:
+        console.print("❌ Keine Datenschutzerklärung gefunden")
+
     console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
 
 if __name__ == "__main__":
