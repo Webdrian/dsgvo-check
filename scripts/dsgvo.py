@@ -1,6 +1,7 @@
 import json
 
 def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="scripts/json/riskmap.json"):
+    external_services = []
     matched_risks = []
     pre_consent_violations = []
     other_risks = []
@@ -27,13 +28,22 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
             })
 
         if pre_consent and entry.get("consent_required", False):
-            pre_consent_violations.append({
-                "name": entry["name"],
-                "category": entry["category"],
-                "risk": entry["risk"],
-                "note": entry.get("note", "Keine besonderen Hinweise."),
-                "emoji": "🚨"
-            })
+            if entry["category"] == "Externe Medien":
+                external_services.append({
+                    "name": entry["name"],
+                    "category": entry["category"],
+                    "risk": entry["risk"],
+                    "note": entry.get("note", "Keine besonderen Hinweise."),
+                    "emoji": "🎥"
+                })
+            else:
+                pre_consent_violations.append({
+                    "name": entry["name"],
+                    "category": entry["category"],
+                    "risk": entry["risk"],
+                    "note": entry.get("note", "Keine besonderen Hinweise."),
+                    "emoji": "🚨"
+                })
 
     # Beispiel für weiteren allgemeinen Risikoeintrag
     if "google-analytics.com" in url.lower():
@@ -41,6 +51,7 @@ def evaluate_risks(url, network_requests, pre_consent_requests, riskmap_path="sc
 
     return {
         "critical_violations": pre_consent_violations,
+        "external_services": external_services,
         "general_risks": matched_risks,
         "other_notes": other_risks
     }
