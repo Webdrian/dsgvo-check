@@ -168,16 +168,16 @@ def main():
 
     console.print(f"[bold]🍪 Cookies vor Zustimmung:[/bold] {len(cookie_analysis['cookies_before'])}")
     console.print(f"[bold]🍪 Cookies nach Zustimmung:[/bold] {len(cookie_analysis['cookies_after'])}")
-
     if not cookie_analysis['cookies_before'] and not cookie_analysis['cookies_after']:
         console.print("Keine Cookies erkannt.")
 
-    if cookie_analysis['suspicious_cookies']:
-        console.print(f"[red]⚠️ Verdächtige Cookies gefunden:[/red] {', '.join(cookie_analysis['suspicious_cookies'])}")
-    if cookie_analysis['critical_before_consent']:
-        console.print(f"[red]🚨 Kritische Cookies vor Einwilligung geladen:[/red] {', '.join(cookie_analysis['critical_before_consent'])}")
+    if cookie_analysis.get('violations'):
+        console.print(f"[red]🚨 Kritische Cookies vor Einwilligung geladen:[/red] {', '.join(cookie_analysis['violations'])}")
     else:
-        console.print("[green]✅ Keine kritischen Cookies vor Zustimmung geladen")
+        console.print("[green]✅ Keine kritischen Cookies vor Zustimmung geladen[/green]")
+
+    if not cookie_analysis.get('consent_mechanism_ok', False):
+        console.print("[red]⚠️ Hinweis: Einige Cookies oder Dienste wurden vor der Zustimmung geladen.[/red]")
     console.print()
 
     # Abschnitt: E-Mail-Sicherheit innerhalb der main()-Funktion

@@ -106,6 +106,8 @@ def analyze_cookies(url):
     # Entferne Duplikate
     critical_before_consent = list(set(critical_before_consent))
 
+    consent_mechanism_ok = len(critical_before_consent) == 0
+
     return {
         "consent_found": consent_found,
         "detected_consent_tool": detected_consent_tool,
@@ -113,7 +115,9 @@ def analyze_cookies(url):
         "cookies_after": cookies_after,
         "suspicious_cookies": suspicious,
         "tools_detected": tools_detected,
-        "critical_before_consent": critical_before_consent
+        "critical_before_consent": critical_before_consent,
+        "consent_mechanism_ok": consent_mechanism_ok,
+        "violations": critical_before_consent
     }
 
 def load_cookie_db():
