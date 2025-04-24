@@ -1,4 +1,4 @@
-from scripts.fetching import fetch_html_and_requests, extract_meta
+from fetching import fetch_html_and_requests, extract_meta
 from cms import detect_cms, detect_wordpress_theme, detect_plugins, detect_technologies
 from ssl_info import get_ssl_info
 from cookies import analyze_cookies, load_cookie_db
