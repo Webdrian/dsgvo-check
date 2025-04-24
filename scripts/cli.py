@@ -137,6 +137,14 @@ def main():
             console.print(f"  ⚠️ {r['name']} → {r['category']} (Risiko: {r['risk']})")
         console.print()
 
+    # Externe Dienste ohne Zustimmung (z.B. Vimeo, YouTube, Google Maps)
+    external_services = risk_result.get("external_services", [])
+    if external_services:
+        console.print("[red]🎥 Externe Dienste ohne Zustimmung geladen:[/red]")
+        for service in external_services:
+            console.print(f"  🎥 {service['name']} → {service['category']} (Risiko: {service['risk']})")
+        console.print()
+
     # Weitere Hinweise (falls vorhanden)
     if indicators:
         console.print("[blue]ℹ️ Hinweise:[/blue]")
