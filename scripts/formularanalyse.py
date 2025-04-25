@@ -9,7 +9,7 @@ def analyze_forms(html, url):
     for form in forms:
         form_info = {}
         action = form.get('action')
-        form_info['action'] = action if action else 'Keine Action-URL angegeben'
+        form_info['action'] = action if action else '⚠️ Action-URL fehlt – mögliche Versandprobleme'
 
         # Prüfen, ob Action-URL SSL verwendet
         if action and action.startswith('http://'):
@@ -25,7 +25,7 @@ def analyze_forms(html, url):
             if any(keyword in name_attr for keyword in ['name', 'email', 'phone', 'tel']):
                 sensitive_fields.append(name_attr or input_type)
 
-        form_info['personenbezogene_felder'] = sensitive_fields if sensitive_fields else 'Keine personenbezogenen Felder erkannt'
+        form_info['personenbezogene_felder'] = sensitive_fields if sensitive_fields else '✅ Keine kritischen Felder erkannt'
 
         # Prüfen auf Checkbox (z.B. für Datenschutz-Zustimmung)
         checkbox = form.find('input', {'type': 'checkbox'})
@@ -33,4 +33,5 @@ def analyze_forms(html, url):
 
         results.append(form_info)
 
+    print(f"{len(forms)} Formulare geprüft – Analyse abgeschlossen ✅")
     return results
