@@ -5,7 +5,7 @@ def export_to_markdown(data, filename):
         
         file.write(f"---\n\n")
         file.write(f"## 🚦 Zusammenfassung\n\n")
-        score = data.get('score', 'N/A')
+        score = int(data.get('score', 0))
         external_services = data.get('external_services', False)
         external_hint = data.get('external_hint', '')
         cookies_critical = data.get('cookies_critical', False)
