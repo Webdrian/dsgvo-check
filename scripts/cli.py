@@ -271,7 +271,8 @@ def main():
         "cookie_consent": cookie_analysis["consent_found"],
         "tracker_pre_consent": bool(risk_result["critical_violations"]),
         "google_fonts_external": risk_result.get("google_fonts_external", False),
-        "legal_pages": legal_pages["impressum"] and legal_pages["datenschutz"]
+        "legal_pages": legal_pages["impressum"] and legal_pages["datenschutz"],
+        "external_services_without_consent": bool(risk_result.get("external_services", []))
     }
 
     score, details, summary = calculate_dsgvo_score(results)
