@@ -16,7 +16,11 @@ def export_to_markdown(data, filename):
         file.write(f"| Bereich             | Status   | Hinweise                             |\n")
         file.write(f"|---------------------|----------|--------------------------------------|\n")
         file.write(f"| **DSGVO-Score**     | {'⚠️' if score < 10 else '✅'}  {score}/10 | {data.get('score_text', '')} |\n")
-        file.write(f"| **Externe Dienste** | {'❌' if external_services else '✅'}        | {external_hint or 'Keine Probleme'} |\n")
+        if external_services:
+            hint_text = external_hint if external_hint else 'Kritische externe Dienste erkannt'
+        else:
+            hint_text = 'Keine Probleme'
+        file.write(f"| **Externe Dienste** | {'❌' if external_services else '✅'}        | {hint_text} |\n")
         file.write(f"| **Cookies**         | {'⚠️' if cookies_critical else '✅'}        | {'Kritische Cookies vor Zustimmung' if cookies_critical else 'Keine kritischen Cookies'} |\n")
         file.write(f"| **E-Mail-Sicherheit** | {'⚠️' if dkim_status != 'OK' else '✅'}   | DKIM: {dkim_status} |\n")
         file.write(f"| **Rechtliche Seiten** | {'✅' if legal_pages_ok else '❌'}        | {'Alles vorhanden' if legal_pages_ok else 'Fehlende Angaben'} |\n")
