@@ -10,6 +10,7 @@ from rich.table import Table
 import json
 from legal_check import check_legal_pages
 from formularanalyse import analyze_forms
+from dsgvo_score import calculate_dsgvo_score
 
 # Definieren der Console Instanz
 console = Console()
@@ -261,6 +262,23 @@ def main():
             console.print(f"- Datenschutz-Checkbox: {form['checkbox_vorhanden']}")
     else:
         console.print("✅ Keine Formulare gefunden oder keine relevanten Risiken.")
+
+    # Abschnitt: DSGVO-Score
+    console.rule("[bold green]10. DSGVO-Score[/bold green]")
+
+    results = {
+        "ssl_valid": ssl_info and "error" not in ssl_info,
+        "cookie_consent": cookie_analysis["consent_found"],
+        "tracker_pre_consent": bool(risk_result["critical_violations"]),
+        "google_fonts_external": risk_result.get("google_fonts_external", False),
+        "legal_pages": legal_pages["impressum"] and legal_pages["datenschutz"]
+    }
+
+    score, details, summary = calculate_dsgvo_score(results)
+    console.print(f"📊 Gesamt: {score}/10 → {summary}")
+    for detail in details:
+        console.print(detail)
+    console.print()
 
     console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
 
