@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 import json
 from legal_check import check_legal_pages
+from formularanalyse import analyze_forms
 
 # Definieren der Console Instanz
 console = Console()
@@ -19,6 +20,7 @@ def main():
 
     # Abruf der HTML-Daten, Cookies, etc.
     html, network_requests, pre_consent_requests, cookie_tool, cookie_banner = fetch_html_and_requests(url)
+    forms = analyze_forms(html, url)
     legal_pages = check_legal_pages(html)
     title, desc = extract_meta(html)
     cms_list, builder_list = detect_cms(html)
@@ -245,6 +247,20 @@ def main():
         console.print("✅ [bold]Datenschutzerklärung vorhanden[/bold]")
     else:
         console.print("⚠️ [yellow]Datenschutzerklärung fehlt – bitte ergänzen![/yellow]")
+
+    # Abschnitt: Formularanalyse
+    console.rule("[bold white]9. Formularanalyse[/bold white]")
+
+    if forms:
+        console.print(f"Gefundene Formulare: {len(forms)}")
+        for idx, form in enumerate(forms, 1):
+            console.print(f"\n[bold]Formular {idx}:[/bold]")
+            console.print(f"- Action URL: {form['action']}")
+            console.print(f"- SSL: {form['ssl']}")
+            console.print(f"- Personenbezogene Felder: {', '.join(form['personenbezogene_felder']) if isinstance(form['personenbezogene_felder'], list) else form['personenbezogene_felder']}")
+            console.print(f"- Datenschutz-Checkbox: {form['checkbox_vorhanden']}")
+    else:
+        console.print("✅ Keine Formulare gefunden oder keine relevanten Risiken.")
 
     console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
 
