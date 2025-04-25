@@ -5,14 +5,24 @@ def export_to_markdown(data, filename):
         
         file.write(f"---\n\n")
         file.write(f"## 🚦 Zusammenfassung\n\n")
-        file.write(f"| Bereich           | Status   | Hinweise                   |\n")
-        file.write(f"|-------------------|----------|----------------------------|\n")
-        file.write(f"| DSGVO-Score       | **{data.get('score', 'N/A')}**     | Bewertung                |\n")
-        file.write(f"| Externe Dienste   | {'❌' if data.get('external_services', False) else '✅'} | {data.get('external_hint', '')} |\n")
-        file.write(f"| Cookies           | ✅        | Keine kritischen Cookies   |\n")
-        file.write(f"| E-Mail-Sicherheit | ⚠️        | Prüfen DKIM & DMARC        |\n")
-        file.write(f"| Rechtliche Seiten | ✅        | Vorhanden                  |\n")
-        file.write(f"| Formulare         | ✅        | Keine Risiken erkannt      |\n\n")
+        score = data.get('score', 'N/A')
+        external_services = data.get('external_services', False)
+        external_hint = data.get('external_hint', '')
+        cookies_critical = data.get('cookies_critical', False)
+        dkim_status = data.get('dkim', 'Unbekannt')
+        legal_pages_ok = data.get('legal_pages_ok', True)
+        forms_ok = data.get('forms_ok', True)
+
+        file.write(f"| Bereich             | Status   | Hinweise                             |\n")
+        file.write(f"|---------------------|----------|--------------------------------------|\n")
+        file.write(f"| **DSGVO-Score**     | {'⚠️' if score < 10 else '✅'}  {score}/10 | {'Kritische Punkte' if score < 10 else 'DSGVO-konform'} |\n")
+        file.write(f"| **Externe Dienste** | {'❌' if external_services else '✅'}        | {external_hint or 'Keine Probleme'} |\n")
+        file.write(f"| **Cookies**         | {'⚠️' if cookies_critical else '✅'}        | {'Kritische Cookies vor Zustimmung' if cookies_critical else 'Keine kritischen Cookies'} |\n")
+        file.write(f"| **E-Mail-Sicherheit** | {'⚠️' if dkim_status != 'OK' else '✅'}   | DKIM: {dkim_status} |\n")
+        file.write(f"| **Rechtliche Seiten** | {'✅' if legal_pages_ok else '❌'}        | {'Alles vorhanden' if legal_pages_ok else 'Fehlende Angaben'} |\n")
+        file.write(f"| **Formulare**       | {'✅' if forms_ok else '⚠️'}              | {'Keine Risiken' if forms_ok else 'Prüfen erforderlich'} |\n\n")
+
+        file.write(f"> **Fazit:** {'Bitte dringend handeln!' if score < 7 else 'Optimierung empfohlen.' if score < 10 else 'Alles in Ordnung.'}\n\n")
 
         file.write(f"---\n\n")
 
