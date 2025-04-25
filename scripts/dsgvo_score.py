@@ -22,7 +22,12 @@ def calculate_dsgvo_score(results):
         score -= 1
         details.append("❌ Google Fonts extern eingebunden (-1)")
 
-    # 5. Impressum & Datenschutz
+    # 5. Externe Dienste ohne Zustimmung
+    if results.get('external_services_without_consent', False):
+        score -= 3
+        details.append("❌ Externe Dienste ohne Zustimmung geladen (-3)")
+
+    # 6. Impressum & Datenschutz
     if not results.get('legal_pages', True):
         score -= 2
         details.append("❌ Fehlendes Impressum oder Datenschutzerklärung (-2)")
