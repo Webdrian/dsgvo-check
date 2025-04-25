@@ -5,7 +5,7 @@ def export_to_markdown(data, filename):
         
         file.write(f"---\n\n")
         file.write(f"## 🚦 Zusammenfassung\n\n")
-        score = int(data.get('score', 0))
+        score = int(data.get('score_value', 0))
         external_services = data.get('external_services', False)
         external_hint = data.get('external_hint', '')
         cookies_critical = data.get('cookies_critical', False)
@@ -15,7 +15,7 @@ def export_to_markdown(data, filename):
 
         file.write(f"| Bereich             | Status   | Hinweise                             |\n")
         file.write(f"|---------------------|----------|--------------------------------------|\n")
-        file.write(f"| **DSGVO-Score**     | {'⚠️' if score < 10 else '✅'}  {score}/10 | {'Kritische Punkte' if score < 10 else 'DSGVO-konform'} |\n")
+        file.write(f"| **DSGVO-Score**     | {'⚠️' if score < 10 else '✅'}  {score}/10 | {data.get('score_text', '')} |\n")
         file.write(f"| **Externe Dienste** | {'❌' if external_services else '✅'}        | {external_hint or 'Keine Probleme'} |\n")
         file.write(f"| **Cookies**         | {'⚠️' if cookies_critical else '✅'}        | {'Kritische Cookies vor Zustimmung' if cookies_critical else 'Keine kritischen Cookies'} |\n")
         file.write(f"| **E-Mail-Sicherheit** | {'⚠️' if dkim_status != 'OK' else '✅'}   | DKIM: {dkim_status} |\n")
@@ -67,6 +67,6 @@ def export_to_markdown(data, filename):
         file.write("\n")
 
         file.write(f"## 9. 📊 DSGVO-Score\n")
-        file.write(f"- **Gesamt:** {data.get('score', 'N/A')}\n\n")
+        file.write(f"- **Gesamt:** {score}/10 – {data.get('score_text', '')}\n\n")
 
         file.write(f"---\n*Analyse abgeschlossen am: {data.get('date', 'N/A')}*\n")

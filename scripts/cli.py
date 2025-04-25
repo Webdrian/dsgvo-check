@@ -313,7 +313,8 @@ def main():
             f"Datenschutzerklärung: {'✅' if legal_pages['datenschutz'] else '❌'}"
         ],
         "forms": [f"Formular mit Feldern: {', '.join(f['personenbezogene_felder']) if isinstance(f['personenbezogene_felder'], list) else f['personenbezogene_felder']}" for f in forms] if forms else ["Keine Formulare gefunden"],
-        "score": f"{score}/10 → {summary}",
+        "score_value": score,
+        "score_text": summary,
         "date": datetime.now().strftime("%d.%m.%Y")
     }
 
