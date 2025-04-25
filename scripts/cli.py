@@ -317,8 +317,8 @@ def main():
         "date": datetime.now().strftime("%d.%m.%Y")
     }
 
-    export_to_markdown(report_data, f"dsgvo-report-{domain}.md")
-    console.print(f"[bold green]📄 Report exportiert als dsgvo-report-{domain}.md[/bold green]")
+    export_to_markdown(report_data, f"reports/dsgvo-report-{domain}.md")
+    console.print(f"[bold green]📄 Report exportiert als reports/dsgvo-report-{domain}.md[/bold green]")
 
 if __name__ == "__main__":
     main()
