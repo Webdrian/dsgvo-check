@@ -32,6 +32,12 @@ def calculate_dsgvo_score(results):
         score -= 2
         details.append("❌ Fehlendes Impressum oder Datenschutzerklärung (-2)")
 
+    # 7. Kritische Risiken aus RiskMap
+    critical_risks = results.get('critical_risks', 0)
+    if critical_risks > 0:
+        score -= critical_risks * 2
+        details.append(f"❌ {critical_risks} kritische Risiken erkannt (-{critical_risks * 2})")
+
     # Score nicht negativ werden lassen
     score = max(score, 0)
 
