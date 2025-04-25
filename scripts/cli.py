@@ -1,3 +1,5 @@
+from report_export import export_to_markdown
+from datetime import datetime
 from fetching import fetch_html_and_requests, extract_meta
 from cms import detect_cms, detect_wordpress_theme, detect_plugins, detect_technologies
 from ssl_info import get_ssl_info
@@ -282,6 +284,41 @@ def main():
     console.print()
 
     console.rule("[bold green]✅ Analyse abgeschlossen[/bold green]")
+
+    report_data = {
+        "url": url,
+        "title": title,
+        "description": desc or "Keine Beschreibung gefunden",
+        "cms": cms_display,
+        "pagebuilder": combined_builder_shop,
+        "plugins": plugins if plugins else [],
+        "trackers": list(detected_trackers),
+        "dsgvo_check": [f"Kritisch: {v['name']}" for v in critical] +
+                       [f"Optimierung: {r['name']}" for r in general] +
+                       [f"Extern: {s['name']}" for s in external_services],
+        "consent_tool": cookie_analysis.get("detected_consent_tool", "Nicht erkannt"),
+        "cookies_before": len(cookie_analysis.get("cookies_before", [])),
+        "cookies_after": len(cookie_analysis.get("cookies_after", [])),
+        "email_security": [
+            f"SPF: {'✅' if str(email_security['spf'].get('status', '')).lower() in ['valid', 'pass', 'true'] else '❌'}",
+            f"DKIM: {'✅' if str(email_security['dkim'].get('status', '')).lower() in ['valid', 'pass', 'true'] else '❌'}",
+            f"DMARC: {'✅' if str(email_security['dmarc'].get('status', '')).lower() in ['valid', 'pass', 'true'] else '❌'}"
+        ],
+        "ssl_info": [
+            f"Issuer: {ssl_info.get('issuer', 'N/A')}",
+            f"Gültig bis: {ssl_info.get('valid_to', 'N/A')}"
+        ] if ssl_info and "error" not in ssl_info else ["SSL-Zertifikat fehlt oder fehlerhaft"],
+        "legal_pages": [
+            f"Impressum: {'✅' if legal_pages['impressum'] else '❌'}",
+            f"Datenschutzerklärung: {'✅' if legal_pages['datenschutz'] else '❌'}"
+        ],
+        "forms": [f"Formular mit Feldern: {', '.join(f['personenbezogene_felder']) if isinstance(f['personenbezogene_felder'], list) else f['personenbezogene_felder']}" for f in forms] if forms else ["Keine Formulare gefunden"],
+        "score": f"{score}/10 → {summary}",
+        "date": datetime.now().strftime("%d.%m.%Y")
+    }
+
+    export_to_markdown(report_data, f"dsgvo-report-{domain}.md")
+    console.print(f"[bold green]📄 Report exportiert als dsgvo-report-{domain}.md[/bold green]")
 
 if __name__ == "__main__":
     main()
